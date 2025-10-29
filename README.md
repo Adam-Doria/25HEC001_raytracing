@@ -2,3 +2,4 @@
 
 contributors: 
 Adam Drici
+Kader Bakayoko
