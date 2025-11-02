@@ -8,7 +8,7 @@ int main(int, char**){
     
     maths::initMaths();
     core::initCore();
-    image::initImage();
+    // Image::initImage();
     
     std::cout << "All modules loaded successfully!\n";
     return 0;
