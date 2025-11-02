@@ -52,7 +52,7 @@ Le projet est organisé en modules indépendants :
 - Compilateur C++17 (GCC, Clang, ou MSVC)
 - Git
 - **clang-format**
-- **Doxygen** 
+- **Doxygen**
 
 **Installation des outils optionnels :**
 
@@ -76,6 +76,9 @@ choco install llvm doxygen.install graphviz
 ```bash
 git clone https://github.com/Adam-Doria/25HEC001_raytracing.git
 cd 25HEC001_raytracing
+
+# Installer les Git hooks (recommandé)
+./install-hooks.sh
 ```
 
 ---
@@ -226,9 +229,30 @@ La realease inversement sera pour tester notre perf et donc idéale pour la dém
 
 ## 🎨 Formatage et Documentation
 
-### Clang-Format (formatage automatique du code)
+### Git Hook (formatage automatique)
 
-Le projet utilise `clang-format` pour maintenir un style de code cohérent.
+**Installation du hook pre-commit** (recommandé pour tous les contributeurs) :
+
+```bash
+./install-hooks.sh
+```
+
+Une fois installé, le hook va **automatiquement formater** tous vos fichiers C++ avant chaque commit !
+
+**Comment ça marche :**
+
+- ✅ Détecte les fichiers C++ modifiés
+- ✅ Les formate avec clang-format
+- ✅ Re-stage les fichiers formatés
+- ✅ Continue le commit
+
+**Note** : Kader et Elyes doivent exécuter `./install-hooks.sh` après avoir cloné le projet.
+
+---
+
+### Clang-Format (formatage manuel)
+
+Si vous n'avez pas installé le hook, vous pouvez formater manuellement :
 
 **Formater un fichier :**
 
@@ -247,6 +271,8 @@ find src/ -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
 ```bash
 clang-format --dry-run --Werror src/main.cpp
 ```
+
+---
 
 ### Doxygen (génération de documentation)
 
