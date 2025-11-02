@@ -1,5 +1,7 @@
+# Dockerfile pour le développement du projet Rayborn (Alpine - version légère)
 FROM alpine:3.18
 
+# Installation des outils de développement C++
 RUN apk add --no-cache \
     build-base \
     cmake \
@@ -9,7 +11,10 @@ RUN apk add --no-cache \
     git \
     vim \
     nano \
-    bash
+    bash \
+    clang-extra-tools \
+    doxygen \
+    graphviz
 
 WORKDIR /app
 

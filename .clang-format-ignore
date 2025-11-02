@@ -1,0 +1,8 @@
+# Fichiers/dossiers à ignorer pour clang-format
+
+build/
+out/
+docs/
+.git/
+\*.md
+CMakeLists.txt

@@ -66,3 +66,6 @@ rayborn
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Documentation générée
+docs/

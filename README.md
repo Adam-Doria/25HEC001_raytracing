@@ -51,6 +51,21 @@ Le projet est organisé en modules indépendants :
 - CMake >= 3.10
 - Compilateur C++17 (GCC, Clang, ou MSVC)
 - Git
+- **clang-format**
+- **Doxygen** 
+
+**Installation des outils optionnels :**
+
+```bash
+# Ubuntu/Debian
+sudo apt install clang-format doxygen graphviz
+
+# macOS
+brew install clang-format doxygen graphviz
+
+# Windows (avec chocolatey)
+choco install llvm doxygen.install graphviz
+```
 
 #### Avec Docker (alternative)
 
@@ -122,14 +137,13 @@ cmake --preset linux-release && cmake --build --preset linux-release && ./out/bu
 Si vous ne voulez pas installer les dépendances localement, ou si vous rencontrez une erreur avec les presets, utilisez Docker. Cette option est **indépendante des presets CMake** et utilise une configuration manuelle.
 On utilise le docker qu'en dev, pour des questions de performance.
 
-
 ### Étapes
 
 ```bash
 # 1. Build de l'image Docker
 docker build -t rayborn-dev .
 
-# 2. Lancer le container à la racine du projet avec un volume monté correspondant à votre code 
+# 2. Lancer le container à la racine du projet avec un volume monté correspondant à votre code
 docker run -it --rm -v $(pwd):/app rayborn-dev
 
 # 3. Dans le container Docker, compiler manuellement
@@ -203,11 +217,71 @@ La différence va se jouer sur l'optomisation, les perf et le temps de compilati
 La debug sera moins performante avec un temps de compilation court, c'est interessant pour tester le projet
 La realease inversement sera pour tester notre perf et donc idéale pour la démo.
 
- 
 **En résumé :**
 
 - 🛠️ **Debug** : Pendant le développement pour faciliter le débogage
 - 🎯 **Release** : Pour la démo avec Kévin et les tests de performance
+
+---
+
+## 🎨 Formatage et Documentation
+
+### Clang-Format (formatage automatique du code)
+
+Le projet utilise `clang-format` pour maintenir un style de code cohérent.
+
+**Formater un fichier :**
+
+```bash
+clang-format -i src/main.cpp
+```
+
+**Formater tous les fichiers du projet :**
+
+```bash
+find src/ -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
+```
+
+**Vérifier le formatage sans modifier :**
+
+```bash
+clang-format --dry-run --Werror src/main.cpp
+```
+
+### Doxygen (génération de documentation)
+
+Le projet utilise `Doxygen` pour générer la documentation automatique du code.
+
+**Générer la documentation :**
+
+```bash
+doxygen Doxyfile
+```
+
+La documentation HTML sera générée dans `docs/html/`. Ouvrez `docs/html/index.html` dans votre navigateur.
+
+**Exemple de commentaire Doxygen :**
+
+```cpp
+/**
+ * @brief Classe représentant un vecteur 3D
+ *
+ * Cette classe gère les opérations mathématiques sur des vecteurs 3D
+ * utilisés pour le raytracing.
+ */
+class Vector3 {
+public:
+    /**
+     * @brief Constructeur par défaut
+     * @param x Composante X
+     * @param y Composante Y
+     * @param z Composante Z
+     */
+    Vector3(double x, double y, double z);
+};
+```
+
+---
 
 ## 📦 Structure des modules CMake
 

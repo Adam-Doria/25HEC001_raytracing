@@ -1,0 +1,45 @@
+---
+# Configuration clang-format pour le projet Rayborn
+# Basé sur le style Google avec quelques ajustements
+
+BasedOnStyle: Google
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+AccessModifierOffset: -4
+
+# Largeur de ligne
+ColumnLimit: 100
+
+# Accolades
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+
+# Espaces
+SpaceAfterCStyleCast: false
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+
+# Pointeurs et références
+DerivePointerAlignment: false
+PointerAlignment: Left
+
+# Includes
+SortIncludes: true
+IncludeBlocks: Regroup
+
+# Namespaces
+NamespaceIndentation: None
+
+# Templates
+AlwaysBreakTemplateDeclarations: Yes
+
+# Commentaires
+ReflowComments: true
+
+# Standard C++
+Standard: c++17
