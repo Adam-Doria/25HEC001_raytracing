@@ -1,6 +1,6 @@
 # 25HEC001_raytracing
 
-Un moteur de raytracing développé en C++ avec une architecture modulaire.
+Projet de développement d'un moteur de raytracing en c++
 
 ## 👥 Contributors
 
@@ -46,33 +46,105 @@ Le projet est organisé en modules indépendants :
 
 ### Prérequis
 
+#### Sur votre machine locale
+
 - CMake >= 3.10
 - Compilateur C++17 (GCC, Clang, ou MSVC)
 - Git
 
-### Compilation
+#### Avec Docker (alternative)
+
+- Docker
+
+### 📥 Cloner le projet
 
 ```bash
-# Cloner le repository
 git clone https://github.com/Adam-Doria/25HEC001_raytracing.git
 cd 25HEC001_raytracing
+```
 
-# Configurer avec CMake
-cmake -B build
+---
 
-# Compiler
+## 💻 Option 1 : Développement local avec CMake Presets
+
+Cette approche utilise les **CMake Presets** configurés pour votre plateforme (Linux, macOS, Windows).
+
+### Lister les presets disponibles
+
+**Presets disponibles :**
+
+- `linux-debug` / `linux-release` (Linux) => Adam
+- `macos-debug` / `macos-release` (macOS) => Kader
+- `windows-debug` / `windows-release` (Windows) => Elyes
+
+### Build avec presets
+
+#### Mode Debug (développement)
+
+```bash
+# Configuration avec preset
+cmake --preset linux-debug  # OU macos-debug OU windows-debug
+
+# Compilation
+cmake --build --preset linux-debug # OU macos-debug OU windows-debug
+
+# Exécution
+./out/build/linux-debug/rayborn # OU /macos-debug/ OU /windows-debug/
+```
+
+#### Mode Release (production)
+
+```bash
+# Configuration avec preset
+cmake --preset linux-release  # ou macos-release / windows-release
+
+# Compilation
+cmake --build --preset linux-release # ou macos-release / windows-release
+
+# Exécution
+./out/build/linux-release/rayborn # ou macos-release / windows-release
+```
+
+### Build et execution en 1 ligne
+
+```bash
+# Debug
+cmake --preset linux-debug && cmake --build --preset linux-debug && ./out/build/linux-debug/rayborn
+
+# Release
+cmake --preset linux-release && cmake --build --preset linux-release && ./out/build/linux-release/rayborn
+```
+
+---
+
+## 🐳 Option 2 : Développement avec Docker
+
+Si vous ne voulez pas installer les dépendances localement, ou si vous rencontrez une erreur avec les presets, utilisez Docker. Cette option est **indépendante des presets CMake** et utilise une configuration manuelle.
+On utilise le docker qu'en dev, pour des questions de performance.
+
+
+### Étapes
+
+```bash
+# 1. Build de l'image Docker
+docker build -t rayborn-dev .
+
+# 2. Lancer le container à la racine du projet avec un volume monté correspondant à votre code 
+docker run -it --rm -v $(pwd):/app rayborn-dev
+
+# 3. Dans le container Docker, compiler manuellement
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
-
-# Exécuter
 ./build/rayborn
 ```
 
-### Build rapide
+**Notes importantes :**
 
-```bash
-# Tout en une ligne
-cmake -B build && cmake --build build && ./build/rayborn
-```
+- ⚠️ Les **presets CMake ne fonctionnent pas dans Docker** (chemins de compilateurs différents)
+- ✅ Vos modifications de code sont **synchronisées en temps réel**
+- ✅ Vous éditez sur votre machine, vous compilez dans le container
+
+---
 
 ## 🛠️ Développement
 
@@ -91,17 +163,51 @@ target_sources(maths
 
 3. Recompiler :
 
+**Avec CMake Presets :**
+
+```bash
+cmake --build --preset linux-debug  # ou votre preset
+```
+
+**Avec Docker :**
+
 ```bash
 cmake --build build
 ```
 
 ### Nettoyer le build
 
+**Avec CMake Presets :**
+
 ```bash
+# Supprimer le dossier de build
+rm -rf out/
+
+# Reconstruire from scratch
+cmake --preset linux-debug
+cmake --build --preset linux-debug
+```
+
+**Avec Docker :**
+
+```bash
+# Dans le container
 rm -rf build
-cmake -B build
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ```
+
+### Différence Debug vs Release
+
+La différence va se jouer sur l'optomisation, les perf et le temps de compilation.
+La debug sera moins performante avec un temps de compilation court, c'est interessant pour tester le projet
+La realease inversement sera pour tester notre perf et donc idéale pour la démo.
+
+ 
+**En résumé :**
+
+- 🛠️ **Debug** : Pendant le développement pour faciliter le débogage
+- 🎯 **Release** : Pour la démo avec Kévin et les tests de performance
 
 ## 📦 Structure des modules CMake
 
@@ -112,30 +218,11 @@ Chaque module est une bibliothèque statique indépendante :
 - **Dépendances** : Gérées via `target_link_libraries`
 
 Exemple de dépendance :
+
 ```cmake
 # Si image dépend de core et maths
 target_link_libraries(image PUBLIC core maths)
 ```
-
-## 📝 Conventions de code
-
-- **Headers** : Extension `.hpp` avec `#pragma once`
-- **Sources** : Extension `.cpp`
-- **Namespaces** : Un namespace par module (`maths`, `core`, `image`)
-- **Standard** : C++17
-
-## 🎯 Roadmap
-
-- [x] Architecture modulaire
-- [x] Configuration CMake
-- [ ] Implémentation des vecteurs 3D
-- [ ] Système de rayons
-- [ ] Caméra basique
-- [ ] Rendu de sphères
-- [ ] Export d'images (PPM)
-- [ ] Matériaux et éclairage
-- [ ] Antialiasing
-- [ ] Réflexions et réfractions
 
 ## 📄 License
 
