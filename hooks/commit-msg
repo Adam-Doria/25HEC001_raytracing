@@ -1,0 +1,46 @@
+#!/bin/bash
+# Git commit-msg hook pour vérifier le format Conventional Commits
+
+commit_msg_file="$1"
+commit_msg=$(cat "$commit_msg_file")
+
+conventional_commit_regex='^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .{1,}'
+
+echo "🔍 Vérification du format du message de commit..."
+
+if ! [[ "$commit_msg" =~ $conventional_commit_regex ]]; then
+    echo ""
+    echo "❌ Erreur: Le message de commit ne respecte pas le format Conventional Commits"
+    echo ""
+    echo "📋 Format attendu:"
+    echo "   type(scope): description"
+    echo ""
+    echo "📝 Types autorisés:"
+    echo "   - feat:     Nouvelle fonctionnalité"
+    echo "   - fix:      Correction de bug"
+    echo "   - docs:     Documentation"
+    echo "   - style:    Formatage, point-virgules manquants, etc."
+    echo "   - refactor: Refactoring du code"
+    echo "   - test:     Ajout ou modification de tests"
+    echo "   - chore:    Maintenance, dépendances, etc."
+    echo "   - perf:     Amélioration de performance"
+    echo "   - ci:       Intégration continue"
+    echo "   - build:    Système de build, dépendances externes"
+    echo "   - revert:   Annulation d'un commit précédent"
+    echo ""
+    echo "✅ Exemples valides:"
+    echo "   feat: ajouter le calcul de raytracing"
+    echo "   feat(camera): implémenter la classe Camera"
+    echo "   fix: corriger le calcul de vecteur normalisé"
+    echo "   docs: mettre à jour le README"
+    echo "   refactor(core): simplifier la logique de Ray"
+    echo ""
+    echo "❌ Votre message:"
+    echo "   $commit_msg"
+    echo ""
+    exit 1
+fi
+
+
+echo "✅ Format du commit valide!"
+exit 0

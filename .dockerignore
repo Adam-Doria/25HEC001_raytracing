@@ -1,0 +1,28 @@
+# Répertoires de build
+build/
+out/
+.cache/
+
+# Fichiers de configuration IDE
+.vscode/
+.vs/
+.idea/
+
+# Fichiers temporaires
+*.swp
+*.swo
+*~
+
+# Fichiers Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Fichiers de sortie
+output/
+*.ppm
+*.png
+*.jpg
