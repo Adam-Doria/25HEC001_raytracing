@@ -1,9 +1,9 @@
-#include <chrono>
 #include <iostream>
 
 #include "core/ray.hpp"
 #include "image/image.hpp"
 #include "maths/vector3.hpp"
+#include "timer/chrono_timer.hpp"
 
 int main(int, char**) {
     std::cout << "Hello, from rayborn!\n";
@@ -28,16 +28,13 @@ int main(int, char**) {
      
     std::cout << "Modules ready. Starting render now...\n";
 
-    auto start = std::chrono::steady_clock::now();
+    Chrono timer;
+
+    timer.start();
 
     img.WriteFile("tesssttttt.png");
 
-    auto end = std::chrono::steady_clock::now();
-
-    std::chrono::duration<double> elapsed = end - start;
-    double seconds = elapsed.count();
-
-    std::cout << "Temps écoulé : " << seconds << " s\n";
+    timer.log("Temps de rendu");
 
     std::cout << "All modules loaded successfully!\n";
     return 0;

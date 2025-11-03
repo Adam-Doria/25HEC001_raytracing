@@ -10,6 +10,7 @@ add_subdirectory(src/core)
 add_subdirectory(src/maths)
 add_subdirectory(src/image)
 add_subdirectory(src/lodepng)
+add_subdirectory(src/timer)
 
 # Exécutable principal
 add_executable(rayborn src/main.cpp)
@@ -21,5 +22,6 @@ target_link_libraries(rayborn
         maths
         image
         lodepng
+        chrono
 )
 
