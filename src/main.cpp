@@ -37,7 +37,7 @@ int main(int, char**) {
     std::chrono::duration<double> elapsed = end - start;
     double seconds = elapsed.count();
 
-    std::clog << "Temps écoulé : " << seconds << " s\n";
+    std::cout << "Temps écoulé : " << seconds << " s\n";
 
     std::cout << "All modules loaded successfully!\n";
     return 0;
