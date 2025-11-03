@@ -1,0 +1,31 @@
+#!/bin/bash
+# Git pre-commit hook pour formater automatiquement le code avec clang-format
+
+echo "🎨 Formatage du code avec clang-format..."
+
+
+files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(cpp|hpp|h)$')
+
+if [ -z "$files" ]; then
+    echo "✅ Aucun fichier C++ à formater"
+    exit 0
+fi
+
+
+if ! command -v clang-format &> /dev/null; then
+    echo "❌ Erreur: clang-format n'est pas installé"
+    echo "Installation: sudo apt install clang-format"
+    exit 1
+fi
+
+
+for file in $files; do
+    if [ -f "$file" ]; then
+        echo "  Formatage: $file"
+        clang-format -i "$file"
+        git add "$file" 
+    fi
+done
+
+echo "✅ Code formaté avec succès!"
+exit 0
