@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 
 #include "core/ray.hpp"
@@ -24,8 +25,19 @@ int main(int, char**) {
             img.SetPixel(i, j, pixel);
         }
     }
+     
+    std::cout << "Modules ready. Starting render now...\n";
+
+    auto start = std::chrono::steady_clock::now();
 
     img.WriteFile("tesssttttt.png");
+
+    auto end = std::chrono::steady_clock::now();
+
+    std::chrono::duration<double> elapsed = end - start;
+    double seconds = elapsed.count();
+
+    std::clog << "Temps écoulé : " << seconds << " s\n";
 
     std::cout << "All modules loaded successfully!\n";
     return 0;
