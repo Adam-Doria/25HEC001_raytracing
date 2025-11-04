@@ -25,8 +25,7 @@ add_subdirectory(src/image)
 add_subdirectory(src/lodepng)
 add_subdirectory(src/tests)
 add_subdirectory(src/timer)
-add_subdirectory(src/hitrecord)
-add_subdirectory(src/hittable)
+
 
 # Exécutable principal
 add_executable(rayborn src/main.cpp)
@@ -39,7 +38,6 @@ target_link_libraries(rayborn
         image
         lodepng
         chrono
-        hitrecord
-        hittable
+
 )
 
