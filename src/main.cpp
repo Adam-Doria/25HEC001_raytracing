@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "core/color.hpp"
 #include "core/ray.hpp"
 #include "image/image.hpp"
 #include "maths/vector3.hpp"
@@ -17,20 +18,56 @@ int main(int, char**) {
 
     // Test 2: create image with simple gradien as in the book
     std::cout << "\nCreating test image...\n";
-    Image img(256, 256);
-
-    for (unsigned int j = 0; j < 256; ++j) {
-        for (unsigned int i = 0; i < 256; ++i) {
-            color pixel(float(i) / 255.0f, float(j) / 255.0f, 0.25f);
-            img.SetPixel(i, j, pixel);
-        }
-    }
-     
-    std::cout << "Modules ready. Starting render now...\n";
-
     Chrono timer;
 
     timer.start();
+
+    // image information
+    auto aspect_ratio = 16.0f / 9.0f;
+    int image_width = 1080;
+
+    int image_height = static_cast<int>(image_width / aspect_ratio);
+    std::cout << " imga height" << image_height << std::endl;
+
+    image_height = (image_height < 1) ? 1 : image_height;
+
+    // camera
+    auto focal_length = 1.0;
+    auto viewport_height = 2.0;
+    auto image_real_ratio = float(image_width) / float(image_height);
+    auto viewport_width = image_real_ratio * viewport_height;
+    auto camera_center = point3(0, 0, 0);
+
+    // vectors for camera like  u and v ( horizontal /vectical)
+    auto viewport_u = vector3(viewport_width, 0, 0);
+    auto viewport_v = vector3(0, viewport_height, 0);
+
+    // calculate for each pixel the ray from the camera origin to the pixel position on the viewport
+    auto pixel_delta_u = viewport_u / (image_width);
+    auto pixel_delta_v = viewport_v / (image_height);
+
+    // top left of the viewport in world space
+    auto viewport_top_left =
+        camera_center - vector3(viewport_width * 0.5, viewport_height * 0.5, focal_length);
+
+    auto first_pixel_center = viewport_top_left + 0.5f * (pixel_delta_u + pixel_delta_v);
+
+    Image img(image_width, image_height);
+
+    for (int j = 0; j < image_height; ++j) {
+        for (int i = 0; i < image_width; ++i) {
+            auto pixel_position =
+                first_pixel_center + float(i) * pixel_delta_u + float(j) * pixel_delta_v;
+
+            auto ray_direction = pixel_position - camera_center;
+
+            ray r(camera_center, ray_direction);
+
+            color pixel = ray_color(r);
+
+            img.SetPixel(i, j, pixel);
+        }
+    }
 
     img.WriteFile("tesssttttt.png");
 
