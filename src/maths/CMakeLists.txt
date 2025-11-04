@@ -1,12 +1,7 @@
 
-add_library(maths STATIC)
-
-target_sources(maths
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/vector3.cpp
-)
+add_library(maths INTERFACE)
 
 target_include_directories(maths
-    PUBLIC
+    INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
