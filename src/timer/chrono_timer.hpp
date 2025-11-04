@@ -1,5 +1,4 @@
-#ifndef CHRONO_TIMER_HPP
-#define CHRONO_TIMER_HPP
+#pragma once
 
 #include <chrono>
 #include <string>
@@ -13,5 +12,3 @@ public:
 private:
     std::chrono::steady_clock::time_point start_time;
 };
-
-#endif
