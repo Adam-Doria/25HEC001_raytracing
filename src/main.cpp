@@ -27,8 +27,6 @@ int main(int, char**) {
 
     img.WriteFile("tesssttttt.png");
 
-    core::initCore();
-
     std::cout << "All modules loaded successfully!\n";
     return 0;
 }
