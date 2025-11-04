@@ -38,6 +38,7 @@ target_link_libraries(rayborn
         image
         lodepng
         chrono
+        sphere
 
 )
 
