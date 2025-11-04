@@ -1,78 +1,86 @@
 #include <iostream>
+#include <memory>
+#include <vector>
 
 #include "core/color.hpp"
 #include "core/ray.hpp"
+#include "hitrecord/hitrecord.hpp"
 #include "image/image.hpp"
 #include "maths/vector3.hpp"
+#include "sphere.hpp"
 #include "timer/chrono_timer.hpp"
 
-int main(int, char**) {
-    std::cout << "Hello, from rayborn!\n";
+color ray_color(const ray& ray, const std::vector<std::shared_ptr<Hittable>>& world_objects) {
+    HitRecord closest_hit;
+    double nearest_distance = 1e9;
+    bool hit_found = false;
 
-    // Test 1: vector3
-    vector3 v1(1.0f, 3.0f, 3.0f);
-    vector3 v2(4.0f, 5.0f, 6.0f);
-    vector3 v3 = v1 * v2;
-    std::cout << "v1 * v2 = " << v3 << std::endl;
-    std::cout << "length of v1: " << v1.length() << std::endl;
-
-    // Test 2: create image with simple gradien as in the book
-    std::cout << "\nCreating test image...\n";
-    Chrono timer;
-
-    timer.start();
-
-    // image information
-    auto aspect_ratio = 16.0f / 9.0f;
-    int image_width = 1080;
-
-    int image_height = static_cast<int>(image_width / aspect_ratio);
-    std::cout << " imga height" << image_height << std::endl;
-
-    image_height = (image_height < 1) ? 1 : image_height;
-
-    // camera
-    auto focal_length = 1.0;
-    auto viewport_height = 2.0;
-    auto image_real_ratio = float(image_width) / float(image_height);
-    auto viewport_width = image_real_ratio * viewport_height;
-    auto camera_center = point3(0, 0, 0);
-
-    // vectors for camera like  u and v ( horizontal /vectical)
-    auto viewport_u = vector3(viewport_width, 0, 0);
-    auto viewport_v = vector3(0, viewport_height, 0);
-
-    // calculate for each pixel the ray from the camera origin to the pixel position on the viewport
-    auto pixel_delta_u = viewport_u / (image_width);
-    auto pixel_delta_v = viewport_v / (image_height);
-
-    // top left of the viewport in world space
-    auto viewport_top_left =
-        camera_center - vector3(viewport_width * 0.5, viewport_height * 0.5, focal_length);
-
-    auto first_pixel_center = viewport_top_left + 0.5f * (pixel_delta_u + pixel_delta_v);
-
-    Image img(image_width, image_height);
-
-    for (int j = 0; j < image_height; ++j) {
-        for (int i = 0; i < image_width; ++i) {
-            auto pixel_position =
-                first_pixel_center + float(i) * pixel_delta_u + float(j) * pixel_delta_v;
-
-            auto ray_direction = pixel_position - camera_center;
-
-            ray r(camera_center, ray_direction);
-
-            color pixel = ray_color(r);
-
-            img.SetPixel(i, j, pixel);
+    for (const auto& object : world_objects) {
+        HitRecord temp_hit;
+        if (object->hit(ray, 0.001, nearest_distance, temp_hit)) {
+            hit_found = true;
+            nearest_distance = temp_hit.t;
+            closest_hit = temp_hit;
         }
     }
 
-    img.WriteFile("tesssttttt.png");
+    if (hit_found) {
+        vector3 normal = closest_hit.normal;
+        return 0.5 * color(normal.x() + 1, normal.y() + 1, normal.z() + 1);
+    }
 
-    timer.log("Temps de rendu");
+    vector3 unit_dir = unit_vector(ray.direction());
+    double t = 0.5 * (unit_dir.y() + 1.0);
+    return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
+}
 
-    std::cout << "All modules loaded successfully!\n";
+int main() {
+    std::cout << "Starting Rayborn renderer...\n";
+
+    const double aspect_ratio = 16.0 / 9.0;
+    const int image_width = 400;
+    int image_height = static_cast<int>(image_width / aspect_ratio);
+
+    Image canvas(image_width, image_height);
+
+    point3 camera_origin(0, 0, 0);
+    double viewport_height = 2.0;
+    double viewport_width = aspect_ratio * viewport_height;
+    double focal_length = 1.0;
+
+    vector3 horizontal(viewport_width, 0, 0);
+    vector3 vertical(0, viewport_height, 0);
+
+    vector3 pixel_step_u = horizontal / static_cast<double>(image_width);
+    vector3 pixel_step_v = vertical / static_cast<double>(image_height);
+
+    vector3 viewport_top_left =
+        camera_origin - vector3(viewport_width / 2, viewport_height / 2, focal_length);
+    vector3 first_pixel_center = viewport_top_left + 0.5 * (pixel_step_u + pixel_step_v);
+
+    std::vector<std::shared_ptr<Hittable>> world;
+    world.push_back(std::make_shared<sphere>(point3(0, 0, -1), 0.5));
+    world.push_back(std::make_shared<sphere>(point3(-1.0, 0, -1.5), 0.5));
+    world.push_back(std::make_shared<sphere>(point3(1.0, 0, -1.5), 0.5));
+    world.push_back(std::make_shared<sphere>(point3(0, -100.5, -1), 100));
+
+    Chrono render_timer;
+    render_timer.start();
+
+    for (int y = 0; y < image_height; ++y) {
+        for (int x = 0; x < image_width; ++x) {
+            vector3 pixel_pos =
+                first_pixel_center + float(x) * pixel_step_u + float(y) * pixel_step_v;
+            ray ray_to_pixel(camera_origin, pixel_pos - camera_origin);
+
+            color pixel_color = ray_color(ray_to_pixel, world);
+            canvas.SetPixel(x, image_height - 1 - y, pixel_color);
+        }
+    }
+
+    canvas.WriteFile("plan.png");
+    render_timer.log("Rendering finished");
+
+    std::cout << "Rayborn rendering complete!\n";
     return 0;
 }
