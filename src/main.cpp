@@ -1,6 +1,6 @@
 #include <vector>
 
-#include "core/color.hpp"
+#include "core/camera.hpp"
 #include "core/hitrecord.hpp"
 #include "core/hittable_list.hpp"
 #include "core/ray.hpp"
@@ -9,56 +9,22 @@
 #include "shape/sphere.hpp"
 
 int main() {
-    std::cout << "Starting Rayborn renderer...\n";
-
-    const float aspect_ratio = 16.0 / 9.0;
-    const int image_width = 1080;
-    int image_height = static_cast<int>(image_width / aspect_ratio);
-    image_height = (image_height < 1) ? 1 : image_height;
-
-    Image canvas(image_width, image_height);
-
     // Camera setup
-    point3 camera_origin(0, 0, 0);
-    float viewport_height = 2.0;
-    float image_ratio = image_width / static_cast<float>(image_height);
-    float viewport_width = image_ratio * viewport_height;
-    float focal_length = 1.0;
+    camera cam;
+    cam.aspect_ratio = 16.0f / 9.0f;
+    cam.image_width = 1080;
+    cam.camera_origin = point3(0, 0, 0);
+    cam.viewport_height = 2.0f;
+    cam.focal_length = 1.0f;
 
-    vector3 horizontal(viewport_width, 0, 0);
-    vector3 vertical(0, viewport_height, 0);
-
-    vector3 pixel_step_u = horizontal / static_cast<float>(image_width);
-    vector3 pixel_step_v = vertical / static_cast<float>(image_height);
-
-    vector3 viewport_top_left =
-        camera_origin - vector3(viewport_width / 2, viewport_height / 2, focal_length);
-    vector3 first_pixel_center = viewport_top_left + 0.5 * (pixel_step_u + pixel_step_v);
-
-    // word
+    // World
     hittable_list world;
-
     world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
     world.add(make_shared<sphere>(point3(-1.0, 0, -1.5), 0.5));
     world.add(make_shared<sphere>(point3(1.0, 0, -1.5), 0.5));
 
-    Chrono render_timer;
-    render_timer.start();
+    // Render
+    cam.render(world, "scene.png");
 
-    for (int y = 0; y < image_height; ++y) {
-        for (int x = 0; x < image_width; ++x) {
-            vector3 pixel_pos =
-                first_pixel_center + float(x) * pixel_step_u + float(y) * pixel_step_v;
-            ray ray_to_pixel(camera_origin, pixel_pos - camera_origin);
-
-            color pixel_color = ray_color(ray_to_pixel, world);
-            canvas.SetPixel(x, image_height - 1 - y, pixel_color);
-        }
-    }
-
-    canvas.WriteFile("scene.png");
-    render_timer.log("Rendering finished");
-
-    std::cout << "Rayborn rendering complete!\n";
     return 0;
 }
