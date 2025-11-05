@@ -5,6 +5,7 @@
 
 #include "hitrecord.hpp"
 #include "hittable.hpp"
+#include "hittable_list.hpp"
 #include "maths/vector3.hpp"
 #include "ray.hpp"
 
@@ -44,12 +45,12 @@ inline color background_color(const ray& r) {
  * Si le rayon touche un objet, retourne une couleur basée sur la normale.
  * Sinon, retourne la couleur de fond.
  */
-inline color ray_color(const ray& r, const std::vector<std::shared_ptr<Hittable>>& world_objects) {
+inline color ray_color(const ray& r, const hittable_list& world) {
     HitRecord closest_hit;
     float nearest_distance = 1e9f;
     bool hit_found = false;
 
-    for (const auto& object : world_objects) {
+    for (const auto& object : world.objects) {
         HitRecord temp_hit;
         if (object->hit(r, 0.001f, nearest_distance, temp_hit)) {
             hit_found = true;

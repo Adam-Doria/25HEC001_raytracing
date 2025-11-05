@@ -1,14 +1,12 @@
-#include <iostream>
-#include <memory>
 #include <vector>
 
 #include "core/color.hpp"
 #include "core/hitrecord.hpp"
+#include "core/hittable_list.hpp"
 #include "core/ray.hpp"
 #include "image/image.hpp"
-#include "maths/vector3.hpp"
+#include "lib/chrono_timer.hpp"
 #include "shape/sphere.hpp"
-#include "timer/chrono_timer.hpp"
 
 int main() {
     std::cout << "Starting Rayborn renderer...\n";
@@ -16,12 +14,15 @@ int main() {
     const float aspect_ratio = 16.0 / 9.0;
     const int image_width = 1080;
     int image_height = static_cast<int>(image_width / aspect_ratio);
+    image_height = (image_height < 1) ? 1 : image_height;
 
     Image canvas(image_width, image_height);
 
+    // Camera setup
     point3 camera_origin(0, 0, 0);
     float viewport_height = 2.0;
-    float viewport_width = aspect_ratio * viewport_height;
+    float image_ratio = image_width / static_cast<float>(image_height);
+    float viewport_width = image_ratio * viewport_height;
     float focal_length = 1.0;
 
     vector3 horizontal(viewport_width, 0, 0);
@@ -34,10 +35,12 @@ int main() {
         camera_origin - vector3(viewport_width / 2, viewport_height / 2, focal_length);
     vector3 first_pixel_center = viewport_top_left + 0.5 * (pixel_step_u + pixel_step_v);
 
-    std::vector<std::shared_ptr<Hittable>> world;
-    world.push_back(std::make_shared<sphere>(point3(0, 0, -1), 0.5));
-    world.push_back(std::make_shared<sphere>(point3(-1.0, 0, -1.5), 0.5));
-    world.push_back(std::make_shared<sphere>(point3(1.0, 0, -1.5), 0.5));
+    // word
+    hittable_list world;
+
+    world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
+    world.add(make_shared<sphere>(point3(-1.0, 0, -1.5), 0.5));
+    world.add(make_shared<sphere>(point3(1.0, 0, -1.5), 0.5));
 
     Chrono render_timer;
     render_timer.start();
