@@ -25,6 +25,7 @@ add_subdirectory(src/image)
 add_subdirectory(src/lodepng)
 add_subdirectory(src/tests)
 add_subdirectory(src/timer)
+add_subdirectory(src/shape)
 
 
 # Exécutable principal
@@ -38,6 +39,6 @@ target_link_libraries(rayborn
         image
         lodepng
         chrono
+        sphere
 
 )
-
