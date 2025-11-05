@@ -13,21 +13,21 @@ int main() {
     // Camera setup
     camera cam;
     cam.aspect_ratio = 16.0f / 9.0f;
-    cam.image_width = 1080;
+    cam.image_width = 1920;
     cam.camera_origin = point3(0, 0, 0);
-    cam.viewport_height = 2.0f;
+    cam.vfov = 45.0f;
     cam.focal_length = 1.0f;
 
     // World
     hittable_list world;
-    world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
-    world.add(make_shared<sphere>(point3(-1.0, 0, -1.5), 0.5));
-    world.add(make_shared<sphere>(point3(1.0, 0, -1.5), 0.5));
-    world.add(std::make_shared<triangle>(point3(-0.8, -0.5, -0.5), point3(-0.2, -0.5, -0.5),
-                                         point3(-0.5, 0.3, -0.5)));
+    world.add(make_shared<sphere>(point3(0, 0, -5), 0.5));
+    world.add(make_shared<sphere>(point3(-1.0, 0, -5.5), 0.5));
+    world.add(make_shared<sphere>(point3(1.0, 0, -5.5), 0.5));
+    // world.add(std::make_shared<triangle>(point3(-0.8, -0.5, -0.5), point3(-0.2, -0.5, -0.5),
+    //                                      point3(-0.5, 0.3, -0.5)));
 
-    world.add(std::make_shared<triangle>(point3(0.2, 0.3, -0.8), point3(0.8, 0.3, -0.8),
-                                         point3(0.5, -0.5, -0.8)));
+    // world.add(std::make_shared<triangle>(point3(0.2, 0.3, -0.8), point3(0.8, 0.3, -0.8),
+    //                                      point3(0.5, -0.5, -0.8)));
 
     // Render
     cam.render(world, "scene.png");

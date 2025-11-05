@@ -20,8 +20,8 @@ public:
     float aspect_ratio = 16.0f / 9.0f;
     int image_width = 1080;
     point3 camera_origin = point3(0, 0, 0);
-    float viewport_height = 2.0f;
     float focal_length = 1.0f;
+    float vfov = 90.0f;
 
     /**
      * @brief Rend la scène complète

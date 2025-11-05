@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "lib/chrono_timer.hpp"
+#include "maths/constants.hpp"
 
 void camera::render(const hittable_list& world, const std::string& output_filename) {
     initialize_camera();
@@ -31,9 +32,12 @@ void camera::initialize_camera() {
     image_height = static_cast<int>(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
 
-    float image_ratio = image_width / static_cast<float>(image_height);
-    viewport_width = image_ratio * viewport_height;
+    float actual_aspect_ratio = image_width / static_cast<float>(image_height);
+    auto theta = degrees_to_radians(vfov);
+    auto h = std::tan(theta / 2);
 
+    auto viewport_height = 2 * h * focal_length;
+    viewport_width = actual_aspect_ratio * viewport_height;
     horizontal = vector3(viewport_width, 0, 0);
     vertical = vector3(0, viewport_height, 0);
 
