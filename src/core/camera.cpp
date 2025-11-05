@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "lib/chrono_timer.hpp"
+#include "maths/constants.hpp"
 
 void camera::render(const hittable_list& world, const std::string& output_filename) {
     initialize_camera();
@@ -14,12 +15,15 @@ void camera::render(const hittable_list& world, const std::string& output_filena
 
     for (int y = 0; y < image_height; ++y) {
         for (int x = 0; x < image_width; ++x) {
-            vector3 pixel_pos =
-                first_pixel_center + float(x) * pixel_step_u + float(y) * pixel_step_v;
-            ray ray_to_pixel(camera_origin, pixel_pos - camera_origin);
+            color pixel_color(0, 0, 0);
+            for (int sample = 0; sample < samples_per_pixel; sample++) {
+                ray r = get_ray(x, y);
+                pixel_color += ray_color(r, world);
+            }
 
-            color pixel_color = ray_color(ray_to_pixel, world);
-            canvas.SetPixel(x, image_height - 1 - y, pixel_color);
+            color final_color = pixel_samples_scale * pixel_color;
+
+            canvas.SetPixel(x, image_height - 1 - y, final_color);
         }
     }
 
@@ -31,9 +35,14 @@ void camera::initialize_camera() {
     image_height = static_cast<int>(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
 
-    float image_ratio = image_width / static_cast<float>(image_height);
-    viewport_width = image_ratio * viewport_height;
+    pixel_samples_scale = 1.0f / samples_per_pixel;
 
+    float actual_aspect_ratio = image_width / static_cast<float>(image_height);
+    auto theta = degrees_to_radians(vfov);
+    auto h = std::tan(theta / 2);
+
+    auto viewport_height = 2.0 * h * focal_length;
+    viewport_width = actual_aspect_ratio * viewport_height;
     horizontal = vector3(viewport_width, 0, 0);
     vertical = vector3(0, viewport_height, 0);
 
@@ -64,4 +73,20 @@ color camera::ray_color(const ray& r, const hittable_list& world) const {
     }
 
     return background_color(r);
+}
+
+ray camera::get_ray(int i, int j) const {
+    auto offset = sample_square();
+
+    auto pixel_sample =
+        first_pixel_center + ((i + offset.x()) * pixel_step_u) + ((j + offset.y()) * pixel_step_v);
+
+    auto ray_origin = camera_origin;
+    auto ray_direction = pixel_sample - ray_origin;
+
+    return ray(ray_origin, ray_direction);
+}
+
+vector3 camera::sample_square() const {
+    return vector3(random_float() - 0.5f, random_float() - 0.5f, 0);
 }

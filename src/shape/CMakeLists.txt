@@ -37,3 +37,23 @@ target_link_libraries(triangle
         core
         maths
 )
+
+# Module Plane
+add_library(plane STATIC)
+
+target_sources(plane
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/plane.cpp
+)
+
+target_include_directories(plane
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
+)
+
+target_link_libraries(plane
+    PUBLIC
+        core
+        maths
+)
