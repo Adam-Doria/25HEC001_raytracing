@@ -41,5 +41,5 @@ target_link_libraries(rayborn
         lodepng
         chrono
         sphere
-
+        triangle
 )
