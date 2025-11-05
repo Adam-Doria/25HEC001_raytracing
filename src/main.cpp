@@ -8,7 +8,6 @@
 #include "lib/chrono_timer.hpp"
 #include "shape/sphere.hpp"
 #include "shape/triangle.hpp"
-#include "timer/chrono_timer.hpp"
 
 int main() {
     // Camera setup
@@ -24,11 +23,11 @@ int main() {
     world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
     world.add(make_shared<sphere>(point3(-1.0, 0, -1.5), 0.5));
     world.add(make_shared<sphere>(point3(1.0, 0, -1.5), 0.5));
-    world.add(std::make_shared<triangle>(point3(-0.8, -0.5, -1.5), point3(-0.2, -0.5, -1.5),
-                                               point3(-0.5, 0.3, -1.5)));
+    world.add(std::make_shared<triangle>(point3(-0.8, -0.5, -0.5), point3(-0.2, -0.5, -0.5),
+                                         point3(-0.5, 0.3, -0.5)));
 
-    world.add(std::make_shared<triangle>(point3(0.2, 0.3, -2.0), point3(0.8, 0.3, -2.0),
-                                               point3(0.5, -0.5, -2.0)));
+    world.add(std::make_shared<triangle>(point3(0.2, 0.3, -0.8), point3(0.8, 0.3, -0.8),
+                                         point3(0.5, -0.5, -0.8)));
 
     // Render
     cam.render(world, "scene.png");

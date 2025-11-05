@@ -7,6 +7,7 @@
 
 class ray;
 class HitRecord;
+class interval;
 
 #include "core/hittable.hpp"
 #include "maths/vector3.hpp"
@@ -32,12 +33,12 @@ public:
      *
      *
      * @param r
-     * @param ray_tmin
-     * @param ray_tmax
+     * @param ray_t
+     *
      * @param rec
      * @return
      */
-    bool hit(const ray& r, float ray_tmin, float ray_tmax, HitRecord& rec) const override;
+    bool hit(const ray& r, interval ray_t, HitRecord& rec) const override;
 
 private:
     point3 v0, v1, v2;

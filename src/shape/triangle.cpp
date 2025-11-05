@@ -4,6 +4,7 @@
 
 #include "core/hitrecord.hpp"
 #include "core/ray.hpp"
+#include "maths/interval.hpp"
 #include "maths/vector3.hpp"
 
 triangle::triangle(const point3& v0, const point3& v1, const point3& v2) : v0(v0), v1(v1), v2(v2) {
@@ -13,7 +14,7 @@ triangle::triangle(const point3& v0, const point3& v1, const point3& v2) : v0(v0
     normal = unit_vector(cross(edge1, edge2));
 }
 
-bool triangle::hit(const ray& r, float ray_tmin, float ray_tmax, HitRecord& rec) const {
+bool triangle::hit(const ray& r, interval ray_t, HitRecord& rec) const {
     const float EPSILON = 1e-8f;
     vector3 edge1 = v1 - v0;
     vector3 edge2 = v2 - v0;
@@ -43,7 +44,7 @@ bool triangle::hit(const ray& r, float ray_tmin, float ray_tmax, HitRecord& rec)
 
     float t = f * dot(edge2, q);
 
-    if (t < ray_tmin || t > ray_tmax) {
+    if (!ray_t.contains(t)) {
         return false;
     }
 
