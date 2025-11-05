@@ -26,6 +26,14 @@ public:
         return (min <= other.max) && (other.min <= max);
     }
 
+    float clamp(float value) const {
+        if (value < min)
+            return min;
+        if (value > max)
+            return max;
+        return value;
+    }
+
     static const interval empty, universe;
 };
 

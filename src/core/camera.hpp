@@ -22,6 +22,7 @@ public:
     point3 camera_origin = point3(0, 0, 0);
     float focal_length = 1.0f;
     float vfov = 90.0f;
+    int samples_per_pixel = 10;
 
     /**
      * @brief Rend la scène complète
@@ -40,6 +41,7 @@ private:
     vector3 pixel_step_v;
     vector3 viewport_top_left;
     vector3 first_pixel_center;
+    float pixel_samples_scale;
 
     /**
      * @brief Initialise les paramètres de la caméra
@@ -60,4 +62,18 @@ private:
      * @return La couleur RGB correspondante
      */
     color ray_color(const ray& r, const hittable_list& world) const;
+
+    /**
+     * @brief Génère un rayon pour un pixel donné avec un offset aléatoire
+     * @param i Coordonnée x du pixel
+     * @param j Coordonnée y du pixel
+     * @return Un rayon partant de la caméra vers un point aléatoire autour du centre du pixel
+     */
+    ray get_ray(int i, int j) const;
+
+    /**
+     * @brief Génère un vecteur aléatoire dans le carré unitaire [-0.5, 0.5]
+     * @return Un vecteur 3D avec composantes x,y aléatoires et z=0
+     */
+    vector3 sample_square() const;
 };

@@ -6,6 +6,7 @@
 #include "core/ray.hpp"
 #include "image/image.hpp"
 #include "lib/chrono_timer.hpp"
+#include "shape/plane.hpp"
 #include "shape/sphere.hpp"
 #include "shape/triangle.hpp"
 
@@ -23,11 +24,12 @@ int main() {
     world.add(make_shared<sphere>(point3(0, 0, -5), 0.5));
     world.add(make_shared<sphere>(point3(-1.0, 0, -5.5), 0.5));
     world.add(make_shared<sphere>(point3(1.0, 0, -5.5), 0.5));
-    // world.add(std::make_shared<triangle>(point3(-0.8, -0.5, -0.5), point3(-0.2, -0.5, -0.5),
-    //                                      point3(-0.5, 0.3, -0.5)));
+    world.add(make_shared<plane>(point3(0.0f, -0.5f, 0.0f), vector3(0.0f, 1.0f, 0.0f)));
+    world.add(std::make_shared<triangle>(point3(-0.8, -0.5, -0.5), point3(-0.2, -0.5, -0.5),
+                                         point3(-0.5, 0.3, -0.5)));
 
-    // world.add(std::make_shared<triangle>(point3(0.2, 0.3, -0.8), point3(0.8, 0.3, -0.8),
-    //                                      point3(0.5, -0.5, -0.8)));
+    world.add(std::make_shared<triangle>(point3(0.2, 0.3, -0.8), point3(0.8, 0.3, -0.8),
+                                         point3(0.5, -0.5, -0.8)));
 
     // Render
     cam.render(world, "scene.png");
