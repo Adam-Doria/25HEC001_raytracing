@@ -38,9 +38,11 @@ public:
      * @return true si le rayon intersecte la sphère dans l'intervalle ray_t, false sinon.
      *
      */
+
     bool hit(const ray& r, interval ray_t, HitRecord& rec) const override;
 
 private:
     point3 center;
     float radius;
+    shared_ptr<material> material;
 };
