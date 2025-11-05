@@ -13,7 +13,7 @@ target_include_directories(core
         ${CMAKE_SOURCE_DIR}/src
 )
 
-target_link_libraries(hitrecord
+target_link_libraries(core
     PUBLIC
         maths
 )
