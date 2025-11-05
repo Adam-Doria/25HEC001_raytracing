@@ -18,6 +18,7 @@ int main() {
     cam.camera_origin = point3(0, 0, 0);
     cam.vfov = 45.0f;
     cam.focal_length = 1.0f;
+    cam.max_depth = 5;
 
     // World
     hittable_list world;

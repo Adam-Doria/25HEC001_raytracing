@@ -23,6 +23,7 @@ public:
     float focal_length = 1.0f;
     float vfov = 90.0f;
     int samples_per_pixel = 10;
+    int max_depth = 5;
 
     /**
      * @brief Rend la scène complète
@@ -59,9 +60,10 @@ private:
      * @brief Calcule la couleur d'un rayon en tenant compte des objets de la scène
      * @param r Le rayon pour lequel calculer la couleur
      * @param world La liste des objets hittables dans la scène
+     * @param depth La profondeur maximale de récursion pour les rebonds de rayons
      * @return La couleur RGB correspondante
      */
-    color ray_color(const ray& r, const hittable_list& world) const;
+    color ray_color(const ray& r, int depth, const hittable_list& world) const;
 
     /**
      * @brief Génère un rayon pour un pixel donné avec un offset aléatoire

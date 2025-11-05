@@ -18,7 +18,7 @@ void camera::render(const hittable_list& world, const std::string& output_filena
             color pixel_color(0, 0, 0);
             for (int sample = 0; sample < samples_per_pixel; sample++) {
                 ray r = get_ray(x, y);
-                pixel_color += ray_color(r, world);
+                pixel_color += ray_color(r, max_depth, world);
             }
 
             color final_color = pixel_samples_scale * pixel_color;
@@ -62,14 +62,15 @@ color camera::background_color(const ray& r) const {
     return (1.0f - t) * deep_space + t * space_blue;
 }
 
-color camera::ray_color(const ray& r, const hittable_list& world) const {
+color camera::ray_color(const ray& r, int depth, const hittable_list& world) const {
     HitRecord rec;
-    interval ray_t(0.001f, 1e9f);
+    interval ray_t(0.00001f, infinity);
+    if (depth <= 0)
+        return color(0, 0, 0);
 
     if (world.hit(r, ray_t, rec)) {
-        vector3 normal = rec.normal;
-        float intensity = (normal.y() + 1.0f) * 0.5f;
-        return color(1.0f, intensity, 0.0f);
+        vector3 direction = random_in_hemisphere(rec.normal);
+        return 0.5f * ray_color(ray(rec.p, direction), depth - 1, world);
     }
 
     return background_color(r);
