@@ -12,7 +12,7 @@
 class ray;
 class HitRecord;
 
-#include "hittable/hittable.hpp"
+#include "core/hittable.hpp"
 #include "maths/vector3.hpp"
 
 /**

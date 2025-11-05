@@ -3,11 +3,11 @@
 #include <vector>
 
 #include "core/color.hpp"
+#include "core/hitrecord.hpp"
 #include "core/ray.hpp"
-#include "hitrecord/hitrecord.hpp"
 #include "image/image.hpp"
 #include "maths/vector3.hpp"
-#include "sphere.hpp"
+#include "shape/sphere.hpp"
 #include "timer/chrono_timer.hpp"
 
 color ray_color(const ray& ray, const std::vector<std::shared_ptr<Hittable>>& world_objects) {

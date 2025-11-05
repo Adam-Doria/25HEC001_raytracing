@@ -14,6 +14,6 @@ target_include_directories(sphere
 
 target_link_libraries(sphere
     PUBLIC
+        core
         maths
-        hittable
 )

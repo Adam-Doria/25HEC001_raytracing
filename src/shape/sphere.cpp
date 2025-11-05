@@ -4,7 +4,7 @@
 #include <cmath>
 
 #include "core/ray.hpp"
-#include "hitrecord/hitrecord.hpp"
+#include "core/hitrecord.hpp"
 #include "maths/vector3.hpp"
 
 sphere::sphere(const point3& center, double radius)
