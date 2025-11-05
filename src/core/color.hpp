@@ -6,6 +6,7 @@
 #include "hitrecord.hpp"
 #include "hittable.hpp"
 #include "hittable_list.hpp"
+#include "maths/interval.hpp"
 #include "maths/vector3.hpp"
 #include "ray.hpp"
 
@@ -47,14 +48,14 @@ inline color background_color(const ray& r) {
  */
 inline color ray_color(const ray& r, const hittable_list& world) {
     HitRecord closest_hit;
-    float nearest_distance = 1e9f;
+    interval ray_t(0.001f, 1e9f);
     bool hit_found = false;
 
     for (const auto& object : world.objects) {
         HitRecord temp_hit;
-        if (object->hit(r, 0.001f, nearest_distance, temp_hit)) {
+        if (object->hit(r, ray_t, temp_hit)) {
             hit_found = true;
-            nearest_distance = temp_hit.t;
+            ray_t.max = temp_hit.t;
             closest_hit = temp_hit;
         }
     }

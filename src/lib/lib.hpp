@@ -13,4 +13,5 @@ using std::shared_ptr;
 #include "core/color.hpp"
 #include "core/ray.hpp"
 #include "maths/constants.hpp"
+#include "maths/interval.hpp"
 #include "maths/vector3.hpp"
