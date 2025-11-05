@@ -7,7 +7,9 @@
 #include "maths/interval.hpp"
 #include "maths/vector3.hpp"
 
-plane::plane(const point3& point_on_plane, const vector3& normal_vector) : point(point_on_plane) {
+plane::plane(const point3& point_on_plane, const vector3& normal_vector,
+             shared_ptr<material> material)
+    : point(point_on_plane), mat(material) {
     auto length = normal_vector.length();
     if (length < 1e-6f) {
         normal = vector3(0.0f, 1.0f, 0.0f);
@@ -32,6 +34,7 @@ bool plane::hit(const ray& r, interval ray_t, HitRecord& rec) const {
     rec.t = t;
     rec.p = r.at(t);
     rec.set_face_normal(r, normal);
+    rec.mat = mat;
 
     return true;
 }

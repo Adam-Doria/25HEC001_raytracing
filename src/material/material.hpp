@@ -38,3 +38,31 @@ public:
         return false;
     }
 };
+
+/**
+ * @class lambertian
+ * @brief Matériau diffus (matte) qui disperse la lumière uniformément.
+ */
+class lambertian : public material {
+public:
+    lambertian(const color& albedo);
+    bool scatter(const ray& r_in, const HitRecord& rec, color& attenuation,
+                 ray& scattered) const override;
+
+private:
+    color albedo;
+};
+
+/**
+ * @class metal
+ * @brief Matériau métallique réfléchissant.
+ */
+class metal : public material {
+public:
+    metal(const color& albedo);
+    bool scatter(const ray& r_in, const HitRecord& rec, color& attenuation,
+                 ray& scattered) const override;
+
+private:
+    color albedo;
+};

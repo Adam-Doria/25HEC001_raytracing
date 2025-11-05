@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "lib/chrono_timer.hpp"
+#include "material/material.hpp"
 #include "maths/constants.hpp"
 
 void camera::render(const hittable_list& world, const std::string& output_filename) {
@@ -57,8 +58,8 @@ void camera::initialize_camera() {
 color camera::background_color(const ray& r) const {
     vector3 unit_direction = unit_vector(r.direction());
     auto t = 0.5f * (unit_direction.y() + 1.0f);
-    color deep_space = color(0.02f, 0.02f, 0.05f);
-    color space_blue = color(0.1f, 0.15f, 0.35f);
+    color deep_space = color(0.2f, 0.2f, 0.5f);
+    color space_blue = color(0.3f, 0.3f, 0.5f);
     return (1.0f - t) * deep_space + t * space_blue;
 }
 
@@ -69,8 +70,11 @@ color camera::ray_color(const ray& r, int depth, const hittable_list& world) con
         return color(0, 0, 0);
 
     if (world.hit(r, ray_t, rec)) {
-        vector3 direction = rec.normal + random_unit_vector();
-        return 0.5f * ray_color(ray(rec.p, direction), depth - 1, world);
+        ray scattered;
+        color attenuation;
+        if (rec.mat->scatter(r, rec, attenuation, scattered))
+            return attenuation * ray_color(scattered, depth - 1, world);
+        return color(0, 0, 0);
     }
 
     return background_color(r);

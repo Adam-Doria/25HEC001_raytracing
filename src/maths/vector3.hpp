@@ -67,7 +67,8 @@ public:
 
     bool near_zero() const {
         auto s = 1e-8;
-        return (std::fabs(e[0]) < s) && (std::fabs(e[1]) < s) && (std::fabs(e[2]) < s);
+        return (std::fabs(element[0]) < s) && (std::fabs(element[1]) < s) &&
+               (std::fabs(element[2]) < s);
     }
 };
 
@@ -126,4 +127,8 @@ inline vector3 random_in_hemisphere(const vector3& normal) {
         return in_unit_sphere;
     else
         return -in_unit_sphere;
+}
+
+inline vector3 reflect(const vector3& v, const vector3& n) {
+    return v - 2 * dot(v, n) * n;
 }

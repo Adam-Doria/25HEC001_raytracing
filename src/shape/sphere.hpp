@@ -1,5 +1,7 @@
 #pragma once
 
+#include "lib/lib.hpp"
+
 /**
  * @file sphere.hpp
  * @brief Déclaration de la classe `sphere`
@@ -10,7 +12,7 @@ class HitRecord;
 class interval;
 
 #include "core/hittable.hpp"
-#include "maths/vector3.hpp"
+#include "material/material.hpp"
 
 /**
  * @brief Représente une sphère géométrique dans la scène.
@@ -26,7 +28,7 @@ public:
      * @param radius Rayon de la sphère. Doit être strictement positif.
      *
      */
-    sphere(const point3& center, float radius);
+    sphere(const point3& center, float radius, shared_ptr<material> material);
 
     /**
      * @brief Teste l'intersection d'un rayon avec la sphère.
@@ -44,5 +46,5 @@ public:
 private:
     point3 center;
     float radius;
-    shared_ptr<material> material;
+    shared_ptr<material> mat;
 };

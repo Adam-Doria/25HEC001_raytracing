@@ -1,7 +1,6 @@
 #pragma once
 
-#include "core/ray.hpp"
-#include "maths/vector3.hpp"
+#include "lib/lib.hpp"
 
 class material;
 
@@ -9,7 +8,7 @@ class HitRecord {
 public:
     point3 p;
     vector3 normal;
-    shared_ptr<material> material;
+    shared_ptr<material> mat;
     float t;
     bool front_face;
 

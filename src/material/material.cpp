@@ -1,21 +1,29 @@
 #include "material.hpp"
 
 #include "core/hitrecord.hpp"
+#include "core/ray.hpp"
+#include "maths/vector3.hpp"
 
-class lambertian : public material {
-public:
-    lambertian(const color& albedo) : albedo(albedo) {}
+// Lambertian material
+lambertian::lambertian(const color& albedo) : albedo(albedo) {}
 
-    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation,
-                 ray& scattered) const override {
-        auto scatter_direction = rec.normal + random_unit_vector();
-        scattered = ray(rec.p, scatter_direction);
-        if (scatter_direction.near_zero())
-            scatter_direction = rec.normal;
-        attenuation = albedo;
-        return true;
-    }
+bool lambertian::scatter(const ray& r_in, const HitRecord& rec, color& attenuation,
+                         ray& scattered) const {
+    auto scatter_direction = rec.normal + random_unit_vector();
+    if (scatter_direction.near_zero())
+        scatter_direction = rec.normal;
+    scattered = ray(rec.p, scatter_direction);
+    attenuation = albedo;
+    return true;
+}
 
-private:
-    color albedo;
-};
+// Metal material
+metal::metal(const color& albedo) : albedo(albedo) {}
+
+bool metal::scatter(const ray& r_in, const HitRecord& rec, color& attenuation,
+                    ray& scattered) const {
+    vector3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+    scattered = ray(rec.p, reflected);
+    attenuation = albedo;
+    return true;
+}

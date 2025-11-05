@@ -1,5 +1,7 @@
 #pragma once
 
+#include "lib/lib.hpp"
+
 /**
  * @file triangle.hpp
  * @brief
@@ -10,7 +12,7 @@ class HitRecord;
 class interval;
 
 #include "core/hittable.hpp"
-#include "maths/vector3.hpp"
+#include "material/material.hpp"
 
 /**
  * @brief
@@ -25,8 +27,9 @@ public:
      * @param v0
      * @param v1
      * @param v2
+     * @param material
      */
-    triangle(const point3& v0, const point3& v1, const point3& v2);
+    triangle(const point3& v0, const point3& v1, const point3& v2, shared_ptr<material> material);
 
     /**
      * @brief
@@ -43,4 +46,5 @@ public:
 private:
     point3 v0, v1, v2;
     vector3 normal;
+    shared_ptr<material> mat;
 };
