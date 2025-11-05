@@ -1,0 +1,48 @@
+#pragma once
+
+/**
+ * @file sphere.hpp
+ * @brief Déclaration de la classe `sphere`
+ */
+
+class ray;
+class HitRecord;
+
+#include "core/hittable.hpp"
+#include "maths/vector3.hpp"
+
+/**
+ * @brief Représente une sphère géométrique dans la scène.
+ *
+ * La sphère est définie par son centre (point3) et son rayon (float).
+ */
+class sphere : public Hittable {
+public:
+    /**
+     * @brief Construit une sphère.
+     *
+     * @param center Position du centre de la sphère dans l'espace monde.
+     * @param radius Rayon de la sphère. Doit être strictement positif.
+     *
+     */
+    sphere(const point3& center, float radius);
+
+    /**
+     * @brief Teste l'intersection d'un rayon avec la sphère.
+     *
+     * @param r Le rayon testé (origine + direction).
+     * @param ray_tmin La borne minimale acceptable pour t (généralement > 0 pour éviter
+     * l'auto-intersection).
+     * @param ray_tmax La borne maximale acceptable pour t (utilisée pour trouver la racine la plus
+     * proche).
+     * @param rec Référence vers la structure HitRecord à remplir en cas d'impact.
+     * @return true si le rayon intersecte la sphère dans l'intervalle [ray_tmin, ray_tmax], false
+     * sinon.
+     *
+     */
+    bool hit(const ray& r, float ray_tmin, float ray_tmax, HitRecord& rec) const override;
+
+private:
+    point3 center;
+    float radius;
+};

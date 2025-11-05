@@ -1,32 +1,61 @@
 #include <iostream>
+#include <memory>
+#include <vector>
 
+#include "core/color.hpp"
+#include "core/hitrecord.hpp"
 #include "core/ray.hpp"
 #include "image/image.hpp"
 #include "maths/vector3.hpp"
+#include "shape/sphere.hpp"
+#include "timer/chrono_timer.hpp"
 
-int main(int, char**) {
-    std::cout << "Hello, from rayborn!\n";
+int main() {
+    std::cout << "Starting Rayborn renderer...\n";
 
-    // Test 1: vector3
-    vector3 v1(1.0f, 3.0f, 3.0f);
-    vector3 v2(4.0f, 5.0f, 6.0f);
-    vector3 v3 = v1 * v2;
-    std::cout << "v1 * v2 = " << v3 << std::endl;
-    std::cout << "length of v1: " << v1.length() << std::endl;
+    const float aspect_ratio = 16.0 / 9.0;
+    const int image_width = 1080;
+    int image_height = static_cast<int>(image_width / aspect_ratio);
 
-    // Test 2: create image with simple gradien as in the book
-    std::cout << "\nCreating test image...\n";
-    Image img(256, 256);
+    Image canvas(image_width, image_height);
 
-    for (unsigned int j = 0; j < 256; ++j) {
-        for (unsigned int i = 0; i < 256; ++i) {
-            color pixel(float(i) / 255.0f, float(j) / 255.0f, 0.25f);
-            img.SetPixel(i, j, pixel);
+    point3 camera_origin(0, 0, 0);
+    float viewport_height = 2.0;
+    float viewport_width = aspect_ratio * viewport_height;
+    float focal_length = 1.0;
+
+    vector3 horizontal(viewport_width, 0, 0);
+    vector3 vertical(0, viewport_height, 0);
+
+    vector3 pixel_step_u = horizontal / static_cast<float>(image_width);
+    vector3 pixel_step_v = vertical / static_cast<float>(image_height);
+
+    vector3 viewport_top_left =
+        camera_origin - vector3(viewport_width / 2, viewport_height / 2, focal_length);
+    vector3 first_pixel_center = viewport_top_left + 0.5 * (pixel_step_u + pixel_step_v);
+
+    std::vector<std::shared_ptr<Hittable>> world;
+    world.push_back(std::make_shared<sphere>(point3(0, 0, -1), 0.5));
+    world.push_back(std::make_shared<sphere>(point3(-1.0, 0, -1.5), 0.5));
+    world.push_back(std::make_shared<sphere>(point3(1.0, 0, -1.5), 0.5));
+
+    Chrono render_timer;
+    render_timer.start();
+
+    for (int y = 0; y < image_height; ++y) {
+        for (int x = 0; x < image_width; ++x) {
+            vector3 pixel_pos =
+                first_pixel_center + float(x) * pixel_step_u + float(y) * pixel_step_v;
+            ray ray_to_pixel(camera_origin, pixel_pos - camera_origin);
+
+            color pixel_color = ray_color(ray_to_pixel, world);
+            canvas.SetPixel(x, image_height - 1 - y, pixel_color);
         }
     }
 
-    img.WriteFile("tesssttttt.png");
+    canvas.WriteFile("scene.png");
+    render_timer.log("Rendering finished");
 
-    std::cout << "All modules loaded successfully!\n";
+    std::cout << "Rayborn rendering complete!\n";
     return 0;
 }
