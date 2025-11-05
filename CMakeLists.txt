@@ -21,10 +21,10 @@ FetchContent_MakeAvailable(googletest)
 # Ajout des sous-modules
 add_subdirectory(src/core)
 add_subdirectory(src/maths)
+add_subdirectory(src/lib)
 add_subdirectory(src/image)
 add_subdirectory(src/lodepng)
 add_subdirectory(src/tests)
-add_subdirectory(src/timer)
 add_subdirectory(src/shape)
 
 
@@ -34,6 +34,7 @@ add_executable(rayborn src/main.cpp)
 # Lier les modules à l'exécutable
 target_link_libraries(rayborn
     PRIVATE
+        rtweekend
         core
         maths
         image

@@ -5,12 +5,13 @@
 
 #include "core/hitrecord.hpp"
 #include "core/ray.hpp"
+#include "maths/interval.hpp"
 #include "maths/vector3.hpp"
 
 sphere::sphere(const point3& center, float radius)
     : center(center), radius(std::max(1e-9f, radius)) {}
 
-bool sphere::hit(const ray& r, float ray_tmin, float ray_tmax, HitRecord& rec) const {
+bool sphere::hit(const ray& r, interval ray_t, HitRecord& rec) const {
     vector3 oc = r.origin() - center;
     auto a = r.direction().length_squared();
     auto half_b = dot(oc, r.direction());
@@ -22,9 +23,9 @@ bool sphere::hit(const ray& r, float ray_tmin, float ray_tmax, HitRecord& rec) c
     auto sqrtd = std::sqrt(discriminant);
 
     auto root = (-half_b - sqrtd) / a;
-    if (root < ray_tmin || root > ray_tmax) {
+    if (!ray_t.contains(root)) {
         root = (-half_b + sqrtd) / a;
-        if (root < ray_tmin || root > ray_tmax)
+        if (!ray_t.contains(root))
             return false;
     }
 

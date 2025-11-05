@@ -5,6 +5,7 @@ target_sources(core
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/ray.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/hitrecord.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/camera.cpp
 )
 
 target_include_directories(core
@@ -16,4 +17,6 @@ target_include_directories(core
 target_link_libraries(core
     PUBLIC
         maths
+        image
+        chrono
 )
