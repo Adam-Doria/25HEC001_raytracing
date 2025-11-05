@@ -5,6 +5,14 @@
 #include <stdexcept>
 
 #include "lodepng/lodepng.h"
+#include "maths/interval.hpp"
+
+inline double linear_to_gamma(double linear_component) {
+    if (linear_component > 0)
+        return std::sqrt(linear_component);
+
+    return 0;
+}
 
 Image::Image(unsigned int w, unsigned int h) : width(w), height(h) {
     buffer.resize(width * height);
@@ -48,10 +56,20 @@ void Image::WriteFile(const char* filename) {
         color pixel = buffer[index];
         int offset = index * 4;
 
-        image[offset] = static_cast<unsigned char>(std::floor(pixel.x() * 255.999));      // R
-        image[offset + 1] = static_cast<unsigned char>(std::floor(pixel.y() * 255.999));  // G
-        image[offset + 2] = static_cast<unsigned char>(std::floor(pixel.z() * 255.999));  // B
-        image[offset + 3] = 255;  // Alpha (opaque)
+        auto r = pixel.x();
+        auto g = pixel.y();
+        auto b = pixel.z();
+
+        r = linear_to_gamma(r);
+        g = linear_to_gamma(g);
+        b = linear_to_gamma(b);
+
+        static const interval intensity(0.000, 0.999);
+
+        image[offset] = static_cast<unsigned char>(256 * intensity.clamp(r));      // R
+        image[offset + 1] = static_cast<unsigned char>(256 * intensity.clamp(g));  // G
+        image[offset + 2] = static_cast<unsigned char>(256 * intensity.clamp(b));  // B
+        image[offset + 3] = 255;                                                   // Alpha (opaque)
     }
 
     unsigned error = lodepng::encode(filename, image, width, height);

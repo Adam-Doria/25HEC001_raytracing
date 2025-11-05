@@ -33,7 +33,7 @@ int main() {
                                          point3(0.5, -0.5, -0.8)));
 
     // Render
-    cam.render(world, "scene.png");
+    cam.render(world, "scene_gamma.png");
 
     return 0;
 }

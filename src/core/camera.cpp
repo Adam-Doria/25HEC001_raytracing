@@ -69,7 +69,7 @@ color camera::ray_color(const ray& r, int depth, const hittable_list& world) con
         return color(0, 0, 0);
 
     if (world.hit(r, ray_t, rec)) {
-        vector3 direction = random_in_hemisphere(rec.normal);
+        vector3 direction = rec.normal + random_unit_vector();
         return 0.5f * ray_color(ray(rec.p, direction), depth - 1, world);
     }
 
