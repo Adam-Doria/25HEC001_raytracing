@@ -7,6 +7,7 @@
 #include "image/image.hpp"
 #include "lib/chrono_timer.hpp"
 #include "material/material.hpp"
+#include "shape/cube.hpp"
 #include "shape/plane.hpp"
 #include "shape/sphere.hpp"
 #include "shape/triangle.hpp"
@@ -28,6 +29,7 @@ int main() {
     auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
     auto material_left = make_shared<metal>(color(0.8, 0.8, 0.8));
     auto material_right = make_shared<metal>(color(0.8, 0.6, 0.2));
+    auto material_cube = make_shared<lambertian>(color(0.2, 0.8, 0.3));
 
     world.add(make_shared<sphere>(point3(0, 0, -5), 0.5, material_center));
     world.add(make_shared<sphere>(point3(-1.0, 0, -5.5), 0.5, material_left));
@@ -39,6 +41,8 @@ int main() {
 
     world.add(std::make_shared<triangle>(point3(0.2, 0.3, -0.8), point3(0.8, 0.3, -0.8),
                                          point3(0.5, -0.5, -0.8), material_center));
+
+    world.add(make_shared<cube>(point3(0, 1.2, -4), 0.8, material_cube));
 
     // Render
     cam.render(world, "scene_with_material.png");
