@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "lib/chrono_timer.hpp"
+#include "material/material.hpp"
 #include "maths/constants.hpp"
 
 void camera::render(const hittable_list& world, const std::string& output_filename) {
@@ -18,7 +19,7 @@ void camera::render(const hittable_list& world, const std::string& output_filena
             color pixel_color(0, 0, 0);
             for (int sample = 0; sample < samples_per_pixel; sample++) {
                 ray r = get_ray(x, y);
-                pixel_color += ray_color(r, world);
+                pixel_color += ray_color(r, max_depth, world);
             }
 
             color final_color = pixel_samples_scale * pixel_color;
@@ -57,19 +58,23 @@ void camera::initialize_camera() {
 color camera::background_color(const ray& r) const {
     vector3 unit_direction = unit_vector(r.direction());
     auto t = 0.5f * (unit_direction.y() + 1.0f);
-    color deep_space = color(0.02f, 0.02f, 0.05f);
-    color space_blue = color(0.1f, 0.15f, 0.35f);
+    color deep_space = color(0.2f, 0.2f, 0.5f);
+    color space_blue = color(0.3f, 0.3f, 0.5f);
     return (1.0f - t) * deep_space + t * space_blue;
 }
 
-color camera::ray_color(const ray& r, const hittable_list& world) const {
+color camera::ray_color(const ray& r, int depth, const hittable_list& world) const {
     HitRecord rec;
-    interval ray_t(0.001f, 1e9f);
+    interval ray_t(0.00001f, infinity);
+    if (depth <= 0)
+        return color(0, 0, 0);
 
     if (world.hit(r, ray_t, rec)) {
-        vector3 normal = rec.normal;
-        float intensity = (normal.y() + 1.0f) * 0.5f;
-        return color(1.0f, intensity, 0.0f);
+        ray scattered;
+        color attenuation;
+        if (rec.mat->scatter(r, rec, attenuation, scattered))
+            return attenuation * ray_color(scattered, depth - 1, world);
+        return color(0, 0, 0);
     }
 
     return background_color(r);

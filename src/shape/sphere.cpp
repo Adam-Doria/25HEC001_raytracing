@@ -8,8 +8,8 @@
 #include "maths/interval.hpp"
 #include "maths/vector3.hpp"
 
-sphere::sphere(const point3& center, float radius)
-    : center(center), radius(std::max(1e-9f, radius)) {}
+sphere::sphere(const point3& center, float radius, shared_ptr<material> material)
+    : center(center), radius(std::max(1e-9f, radius)), mat(material) {}
 
 bool sphere::hit(const ray& r, interval ray_t, HitRecord& rec) const {
     vector3 oc = r.origin() - center;
@@ -33,6 +33,7 @@ bool sphere::hit(const ray& r, interval ray_t, HitRecord& rec) const {
     rec.p = r.at(rec.t);
     vector3 outward_normal = (rec.p - center) / radius;
     rec.set_face_normal(r, outward_normal);
+    rec.mat = mat;
 
     return true;
 }

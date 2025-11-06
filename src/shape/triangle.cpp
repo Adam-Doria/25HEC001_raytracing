@@ -7,7 +7,9 @@
 #include "maths/interval.hpp"
 #include "maths/vector3.hpp"
 
-triangle::triangle(const point3& v0, const point3& v1, const point3& v2) : v0(v0), v1(v1), v2(v2) {
+triangle::triangle(const point3& v0, const point3& v1, const point3& v2,
+                   shared_ptr<material> material)
+    : v0(v0), v1(v1), v2(v2), mat(material) {
     // Calcul de la normale du triangle
     vector3 edge1 = v1 - v0;
     vector3 edge2 = v2 - v0;
@@ -51,6 +53,7 @@ bool triangle::hit(const ray& r, interval ray_t, HitRecord& rec) const {
     rec.t = t;
     rec.p = r.at(t);
     rec.set_face_normal(r, normal);
+    rec.mat = mat;
 
     return true;
 }

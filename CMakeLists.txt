@@ -26,6 +26,7 @@ add_subdirectory(src/image)
 add_subdirectory(src/lodepng)
 add_subdirectory(src/tests)
 add_subdirectory(src/shape)
+add_subdirectory(src/material)
 
 
 # Exécutable principal
@@ -43,4 +44,5 @@ target_link_libraries(rayborn
         sphere
   triangle
   plane
+  material
 )

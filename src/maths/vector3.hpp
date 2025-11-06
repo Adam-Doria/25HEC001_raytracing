@@ -3,6 +3,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "constants.hpp"
+
 class vector3 {
 public:
     float element[3];
@@ -55,6 +57,19 @@ public:
     float length_squared() const {
         return element[0] * element[0] + element[1] * element[1] + element[2] * element[2];
     }
+
+    static vector3 random() {
+        return vector3(random_float(), random_float(), random_float());
+    }
+    static vector3 random(float min, float max) {
+        return vector3(random_float(min, max), random_float(min, max), random_float(min, max));
+    }
+
+    bool near_zero() const {
+        auto s = 1e-8;
+        return (std::fabs(element[0]) < s) && (std::fabs(element[1]) < s) &&
+               (std::fabs(element[2]) < s);
+    }
 };
 
 using point3 = vector3;  // 3D point
@@ -95,4 +110,25 @@ inline vector3 cross(const vector3& u, const vector3& v) {
 }
 inline vector3 unit_vector(vector3 v) {
     return v / v.length();
+}
+
+inline vector3 random_unit_vector() {
+    while (true) {
+        vector3 p = vector3::random(-1.0f, 1.0f);
+        auto lensq = p.length_squared();
+        if (1e-160 < lensq && lensq <= 1)
+            return p / sqrt(lensq);
+    }
+}
+
+inline vector3 random_in_hemisphere(const vector3& normal) {
+    vector3 in_unit_sphere = random_unit_vector();
+    if (dot(in_unit_sphere, normal) > 0.0f)
+        return in_unit_sphere;
+    else
+        return -in_unit_sphere;
+}
+
+inline vector3 reflect(const vector3& v, const vector3& n) {
+    return v - 2 * dot(v, n) * n;
 }
