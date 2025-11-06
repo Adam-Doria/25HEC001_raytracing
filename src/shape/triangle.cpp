@@ -10,13 +10,11 @@ triangle::triangle(const point3& v0, const point3& v1, const point3& v2,
     vector3 edge2 = v2 - v0;
     normal = unit_vector(cross(edge1, edge2));
 
-    // Calculer la bounding box du triangle
     point3 min_point(std::min({v0.x(), v1.x(), v2.x()}), std::min({v0.y(), v1.y(), v2.y()}),
                      std::min({v0.z(), v1.z(), v2.z()}));
     point3 max_point(std::max({v0.x(), v1.x(), v2.x()}), std::max({v0.y(), v1.y(), v2.y()}),
                      std::max({v0.z(), v1.z(), v2.z()}));
 
-    // Ajouter un petit padding pour éviter les bounding boxes plates
     const float epsilon = 1e-4f;
     if (max_point.x() - min_point.x() < epsilon) {
         min_point = point3(min_point.x() - epsilon, min_point.y(), min_point.z());
@@ -44,7 +42,7 @@ bool triangle::hit(const ray& r, interval ray_t, HitRecord& rec) const {
     float a = dot(edge1, h);
 
     if (a > -EPSILON && a < EPSILON) {
-        return false;  // Pas d'intersection
+        return false;
     }
 
     float f = 1.0f / a;
