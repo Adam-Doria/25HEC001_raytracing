@@ -1,61 +1,61 @@
-#include <iostream>
-#include <memory>
 #include <vector>
 
-#include "core/color.hpp"
+#include "core/bvh_node.hpp"
+#include "core/camera.hpp"
 #include "core/hitrecord.hpp"
+#include "core/hittable_list.hpp"
 #include "core/ray.hpp"
 #include "image/image.hpp"
-#include "maths/vector3.hpp"
+#include "lib/chrono_timer.hpp"
+#include "material/material.hpp"
+#include "shape/cube.hpp"
+#include "shape/plane.hpp"
+#include "shape/read_mesh.hpp"
 #include "shape/sphere.hpp"
-#include "timer/chrono_timer.hpp"
+#include "shape/triangle.hpp"
 
 int main() {
-    std::cout << "Starting Rayborn renderer...\n";
+    // Camera setup
+    camera cam;
+    cam.aspect_ratio = 16.0f / 9.0f;
+    cam.image_width = 1920;
+    cam.camera_origin = point3(0, 0, 0);
+    cam.vfov = 45.0f;
+    cam.focal_length = 1.0f;
+    cam.samples_per_pixel = 50;
+    cam.max_depth = 5;
 
-    const float aspect_ratio = 16.0 / 9.0;
-    const int image_width = 1080;
-    int image_height = static_cast<int>(image_width / aspect_ratio);
+    // World
+    hittable_list world;
 
-    Image canvas(image_width, image_height);
+    auto material_ground = make_shared<lambertian>(color(0.8, 0.2, 0.1));
+    auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
+    auto material_left = make_shared<metal>(color(0.8, 0.8, 0.8));
+    auto material_right = make_shared<metal>(color(0.8, 0.6, 0.2));
+    auto material_cube = make_shared<lambertian>(color(0.2, 0.8, 0.3));
+    auto material_dino = make_shared<metal>(color(0.4, 0.7, 0.3));
+    auto material_spaceship = make_shared<lambertian>(color(0.7, 0.7, 0.7));
 
-    point3 camera_origin(0, 0, 0);
-    float viewport_height = 2.0;
-    float viewport_width = aspect_ratio * viewport_height;
-    float focal_length = 1.0;
+    world.add(make_shared<sphere>(point3(0, 0, -5), 0.5, material_center));
+    world.add(make_shared<sphere>(point3(-1.0, 0, -5.5), 0.5, material_left));
+    world.add(make_shared<sphere>(point3(1.0, 0, -5.5), 0.5, material_right));
+    world.add(
+        make_shared<plane>(point3(0.0f, -0.5f, 0.0f), vector3(0.0f, 1.0f, 0.0f), material_ground));
+    world.add(std::make_shared<triangle>(point3(-0.8, -0.5, -0.5), point3(-0.2, -0.5, -0.5),
+                                         point3(-0.5, 0.3, -0.5), material_left));
 
-    vector3 horizontal(viewport_width, 0, 0);
-    vector3 vertical(0, viewport_height, 0);
+    world.add(std::make_shared<triangle>(point3(0.2, 0.3, -0.8), point3(0.8, 0.3, -0.8),
+                                         point3(0.5, -0.5, -0.8), material_center));
 
-    vector3 pixel_step_u = horizontal / static_cast<float>(image_width);
-    vector3 pixel_step_v = vertical / static_cast<float>(image_height);
+    world.add(make_shared<cube>(point3(0, 1.2, -4), 0.8, material_cube));
 
-    vector3 viewport_top_left =
-        camera_origin - vector3(viewport_width / 2, viewport_height / 2, focal_length);
-    vector3 first_pixel_center = viewport_top_left + 0.5 * (pixel_step_u + pixel_step_v);
+    read_mesh dino_loader("dino.obj", &world, material_dino, 0.1f, point3(-2, -0.5, -6));
+    dino_loader.add_mesh();
 
-    std::vector<std::shared_ptr<Hittable>> world;
-    world.push_back(std::make_shared<sphere>(point3(0, 0, -1), 0.5));
-    world.push_back(std::make_shared<sphere>(point3(-1.0, 0, -1.5), 0.5));
-    world.push_back(std::make_shared<sphere>(point3(1.0, 0, -1.5), 0.5));
+    world = hittable_list(make_shared<bvh_node>(world));
 
-    Chrono render_timer;
-    render_timer.start();
+    // Render
+    cam.render(world, "scene_with_mesh.png");
 
-    for (int y = 0; y < image_height; ++y) {
-        for (int x = 0; x < image_width; ++x) {
-            vector3 pixel_pos =
-                first_pixel_center + float(x) * pixel_step_u + float(y) * pixel_step_v;
-            ray ray_to_pixel(camera_origin, pixel_pos - camera_origin);
-
-            color pixel_color = ray_color(ray_to_pixel, world);
-            canvas.SetPixel(x, image_height - 1 - y, pixel_color);
-        }
-    }
-
-    canvas.WriteFile("scene.png");
-    render_timer.log("Rendering finished");
-
-    std::cout << "Rayborn rendering complete!\n";
     return 0;
 }

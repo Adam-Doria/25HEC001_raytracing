@@ -3,6 +3,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "constants.hpp"
+
 class vector3 {
 public:
     float element[3];
@@ -45,7 +47,8 @@ public:
         return *this;
     }
     vector3& operator/=(const float t) {
-        return *this *= 1 / t;
+        float inv = 1.0f / t;
+        return *this *= inv;
     }
 
     float length() const {
@@ -54,6 +57,23 @@ public:
 
     float length_squared() const {
         return element[0] * element[0] + element[1] * element[1] + element[2] * element[2];
+    }
+
+    float inv_length() const {
+        return 1.0f / std::sqrt(length_squared());
+    }
+
+    static vector3 random() {
+        return vector3(random_float(), random_float(), random_float());
+    }
+    static vector3 random(float min, float max) {
+        return vector3(random_float(min, max), random_float(min, max), random_float(min, max));
+    }
+
+    bool near_zero() const {
+        auto s = 1e-8;
+        return (std::fabs(element[0]) < s) && (std::fabs(element[1]) < s) &&
+               (std::fabs(element[2]) < s);
     }
 };
 
@@ -82,8 +102,9 @@ inline vector3 operator*(float t, const vector3& v) {
 inline vector3 operator*(const vector3& v, float t) {
     return t * v;
 }
-inline vector3 operator/(vector3 v, float t) {
-    return (1 / t) * v;
+inline vector3 operator/(const vector3& v, float t) {
+    float inv = 1.0f / t;
+    return inv * v;
 }
 inline float dot(const vector3& u, const vector3& v) {
     return u.element[0] * v.element[0] + u.element[1] * v.element[1] + u.element[2] * v.element[2];
@@ -93,6 +114,28 @@ inline vector3 cross(const vector3& u, const vector3& v) {
                    u.element[2] * v.element[0] - u.element[0] * v.element[2],
                    u.element[0] * v.element[1] - u.element[1] * v.element[0]);
 }
-inline vector3 unit_vector(vector3 v) {
-    return v / v.length();
+inline vector3 unit_vector(const vector3& v) {
+    float inv_len = v.inv_length();
+    return inv_len * v;
+}
+
+inline vector3 random_unit_vector() {
+    while (true) {
+        vector3 p = vector3::random(-1.0f, 1.0f);
+        auto lensq = p.length_squared();
+        if (1e-160 < lensq && lensq <= 1)
+            return p / sqrt(lensq);
+    }
+}
+
+inline vector3 random_in_hemisphere(const vector3& normal) {
+    vector3 in_unit_sphere = random_unit_vector();
+    if (dot(in_unit_sphere, normal) > 0.0f)
+        return in_unit_sphere;
+    else
+        return -in_unit_sphere;
+}
+
+inline vector3 reflect(const vector3& v, const vector3& n) {
+    return v - 2 * dot(v, n) * n;
 }
