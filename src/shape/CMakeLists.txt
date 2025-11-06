@@ -57,3 +57,24 @@ target_link_libraries(plane
         core
         maths
 )
+
+# Module Cube
+add_library(cube STATIC)
+
+target_sources(cube
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/cube.cpp
+)
+
+target_include_directories(cube
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
+)
+
+target_link_libraries(cube
+    PUBLIC
+        core
+        maths
+        triangle
+)

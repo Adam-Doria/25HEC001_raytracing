@@ -44,5 +44,6 @@ target_link_libraries(rayborn
         sphere
   triangle
   plane
+  cube
   material
 )
