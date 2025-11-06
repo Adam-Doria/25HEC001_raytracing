@@ -1,11 +1,6 @@
 #include "triangle.hpp"
 
-#include <cmath>
-
 #include "core/hitrecord.hpp"
-#include "core/ray.hpp"
-#include "maths/interval.hpp"
-#include "maths/vector3.hpp"
 
 triangle::triangle(const point3& v0, const point3& v1, const point3& v2,
                    shared_ptr<material> material)
@@ -14,6 +9,29 @@ triangle::triangle(const point3& v0, const point3& v1, const point3& v2,
     vector3 edge1 = v1 - v0;
     vector3 edge2 = v2 - v0;
     normal = unit_vector(cross(edge1, edge2));
+
+    // Calculer la bounding box du triangle
+    point3 min_point(std::min({v0.x(), v1.x(), v2.x()}), std::min({v0.y(), v1.y(), v2.y()}),
+                     std::min({v0.z(), v1.z(), v2.z()}));
+    point3 max_point(std::max({v0.x(), v1.x(), v2.x()}), std::max({v0.y(), v1.y(), v2.y()}),
+                     std::max({v0.z(), v1.z(), v2.z()}));
+
+    // Ajouter un petit padding pour éviter les bounding boxes plates
+    const float epsilon = 1e-4f;
+    if (max_point.x() - min_point.x() < epsilon) {
+        min_point = point3(min_point.x() - epsilon, min_point.y(), min_point.z());
+        max_point = point3(max_point.x() + epsilon, max_point.y(), max_point.z());
+    }
+    if (max_point.y() - min_point.y() < epsilon) {
+        min_point = point3(min_point.x(), min_point.y() - epsilon, min_point.z());
+        max_point = point3(max_point.x(), max_point.y() + epsilon, max_point.z());
+    }
+    if (max_point.z() - min_point.z() < epsilon) {
+        min_point = point3(min_point.x(), min_point.y(), min_point.z() - epsilon);
+        max_point = point3(max_point.x(), max_point.y(), max_point.z() + epsilon);
+    }
+
+    bbox = aabb(min_point, max_point);
 }
 
 bool triangle::hit(const ray& r, interval ray_t, HitRecord& rec) const {

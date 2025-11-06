@@ -1,11 +1,6 @@
 #include "plane.hpp"
 
-#include <cmath>
-
 #include "core/hitrecord.hpp"
-#include "core/ray.hpp"
-#include "maths/interval.hpp"
-#include "maths/vector3.hpp"
 
 plane::plane(const point3& point_on_plane, const vector3& normal_vector,
              shared_ptr<material> material)
@@ -16,6 +11,9 @@ plane::plane(const point3& point_on_plane, const vector3& normal_vector,
     } else {
         normal = normal_vector / length;
     }
+
+    // Un plan infini a une bounding box infinie
+    bbox = aabb(point3(-infinity, -infinity, -infinity), point3(+infinity, +infinity, +infinity));
 }
 
 bool plane::hit(const ray& r, interval ray_t, HitRecord& rec) const {

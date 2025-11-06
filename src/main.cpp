@@ -1,5 +1,6 @@
 #include <vector>
 
+#include "core/bvh_node.hpp"
 #include "core/camera.hpp"
 #include "core/hitrecord.hpp"
 #include "core/hittable_list.hpp"
@@ -20,6 +21,7 @@ int main() {
     cam.camera_origin = point3(0, 0, 0);
     cam.vfov = 45.0f;
     cam.focal_length = 1.0f;
+    cam.samples_per_pixel = 500;
     cam.max_depth = 5;
 
     // World
@@ -43,9 +45,10 @@ int main() {
                                          point3(0.5, -0.5, -0.8), material_center));
 
     world.add(make_shared<cube>(point3(0, 1.2, -4), 0.8, material_cube));
+    world = hittable_list(make_shared<bvh_node>(world));
 
     // Render
-    cam.render(world, "scene_with_material.png");
+    cam.render(world, "scene_with_material_500_withBVH.png");
 
     return 0;
 }

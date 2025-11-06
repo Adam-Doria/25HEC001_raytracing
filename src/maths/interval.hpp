@@ -34,6 +34,16 @@ public:
         return value;
     }
 
+    interval expand(float delta) const {
+        float padding = delta * 0.5f;
+        return interval(min - padding, max + padding);
+    }
+
+    interval(const interval& a, const interval& b) {
+        min = (a.min <= b.min) ? a.min : b.min;
+        max = (a.max >= b.max) ? a.max : b.max;
+    }
+
     static const interval empty, universe;
 };
 
