@@ -48,7 +48,7 @@ int main() {
     world = hittable_list(make_shared<bvh_node>(world));
 
     // Render
-    cam.render(world, "scene_with_material_500_withBVH.png");
+    cam.render(world, "scene_with_material_500_withBVHandMultithreading.png");
 
     return 0;
 }

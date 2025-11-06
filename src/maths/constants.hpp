@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <limits>
+#include <random>
 
 // Mathematical Constants
 inline constexpr double infinity = std::numeric_limits<double>::infinity();
@@ -13,7 +14,13 @@ inline double degrees_to_radians(double degrees) {
 }
 
 inline float random_float() {
-    return rand() / (RAND_MAX + 1.0f);
+    thread_local static std::mt19937* generator = nullptr;
+    if (!generator) {
+        std::random_device rd;
+        generator = new std::mt19937(rd());
+    }
+    thread_local static std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
+    return distribution(*generator);
 }
 
 inline float random_float(float min, float max) {

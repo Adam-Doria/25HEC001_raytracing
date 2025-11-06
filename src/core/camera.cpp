@@ -1,6 +1,9 @@
 #include "camera.hpp"
 
+#include <atomic>
 #include <iostream>
+#include <thread>
+#include <vector>
 
 #include "lib/chrono_timer.hpp"
 #include "material/material.hpp"
@@ -14,18 +17,40 @@ void camera::render(const hittable_list& world, const std::string& output_filena
     Chrono render_timer;
     render_timer.start();
 
-    for (int y = 0; y < image_height; ++y) {
-        for (int x = 0; x < image_width; ++x) {
-            color pixel_color(0, 0, 0);
-            for (int sample = 0; sample < samples_per_pixel; sample++) {
-                ray r = get_ray(x, y);
-                pixel_color += ray_color(r, max_depth, world);
+    unsigned int num_threads = std::thread::hardware_concurrency();
+    if (num_threads == 0)
+        num_threads = 4;
+
+    std::cout << "Rendering with " << num_threads << " threads..." << std::endl;
+
+    std::vector<std::thread> threads;
+    std::atomic<int> next_line(0);
+
+    auto render_lines = [&]() {
+        while (true) {
+            int y = next_line.fetch_add(1);
+            if (y >= image_height)
+                break;
+
+            for (int x = 0; x < image_width; ++x) {
+                color pixel_color(0, 0, 0);
+                for (int sample = 0; sample < samples_per_pixel; sample++) {
+                    ray r = get_ray(x, y);
+                    pixel_color += ray_color(r, max_depth, world);
+                }
+
+                color final_color = pixel_samples_scale * pixel_color;
+                canvas.SetPixel(x, image_height - 1 - y, final_color);
             }
-
-            color final_color = pixel_samples_scale * pixel_color;
-
-            canvas.SetPixel(x, image_height - 1 - y, final_color);
         }
+    };
+
+    for (unsigned int i = 0; i < num_threads; ++i) {
+        threads.emplace_back(render_lines);
+    }
+
+    for (auto& thread : threads) {
+        thread.join();
     }
 
     canvas.WriteFile(output_filename.c_str());
