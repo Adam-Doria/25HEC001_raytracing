@@ -81,10 +81,12 @@ void camera::initialize_camera() {
 }
 
 color camera::background_color(const ray& r) const {
+    // Précalcul des constantes (évite allocation à chaque appel)
+    static const color deep_space(0.2f, 0.2f, 0.5f);
+    static const color space_blue(0.3f, 0.3f, 0.5f);
+
     vector3 unit_direction = unit_vector(r.direction());
     auto t = 0.5f * (unit_direction.y() + 1.0f);
-    color deep_space = color(0.2f, 0.2f, 0.5f);
-    color space_blue = color(0.3f, 0.3f, 0.5f);
     return (1.0f - t) * deep_space + t * space_blue;
 }
 
