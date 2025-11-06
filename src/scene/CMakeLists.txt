@@ -10,6 +10,9 @@ target_link_libraries(scene
     PUBLIC
         nlohmann_json::nlohmann_json   # <- nécessaire pour json.hpp
         core
-        shape
+        sphere
+        triangle
+        plane
+        cube
         material
 )
