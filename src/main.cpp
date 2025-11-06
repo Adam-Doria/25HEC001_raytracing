@@ -8,6 +8,7 @@
 #include "image/image.hpp"
 #include "lib/chrono_timer.hpp"
 #include "material/material.hpp"
+#include "scene/scene.hpp"
 #include "shape/cube.hpp"
 #include "shape/plane.hpp"
 #include "shape/read_mesh.hpp"
@@ -56,6 +57,15 @@ int main() {
 
     // Render
     cam.render(world, "scene_with_mesh.png");
+
+    // // === Load and render scene from JSON ===
+    // hittable_list json_world;
+    // load_scene_from_json_file("scene.json", json_world);
+
+    // if (!json_world.objects.empty()) {
+    //     json_world = hittable_list(make_shared<bvh_node>(json_world));
+    //     cam.render(json_world, "scene_from_json.png");
+    // }
 
     return 0;
 }

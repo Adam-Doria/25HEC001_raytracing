@@ -18,6 +18,13 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+# Télécharger et configurer nlohmann_json
+FetchContent_Declare(
+  nlohmann_json
+  URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
 # Ajout des sous-modules
 add_subdirectory(src/core)
 add_subdirectory(src/maths)
@@ -27,6 +34,7 @@ add_subdirectory(src/lodepng)
 add_subdirectory(src/tests)
 add_subdirectory(src/shape)
 add_subdirectory(src/material)
+add_subdirectory(src/scene)
 
 
 # Exécutable principal
@@ -46,4 +54,5 @@ target_link_libraries(rayborn
   plane
   cube
   material
+  scene
 )
