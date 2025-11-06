@@ -1,8 +1,5 @@
-#include <algorithm>
-
 #include "hitrecord.hpp"
 #include "hittable_list.hpp"
-#include "ray.hpp"
 
 bool hittable_list::hit(const ray& r, float ray_tmin, float ray_tmax, HitRecord& rec) const {
     HitRecord temp_rec;

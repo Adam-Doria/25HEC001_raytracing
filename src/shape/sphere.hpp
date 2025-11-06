@@ -43,8 +43,13 @@ public:
 
     bool hit(const ray& r, interval ray_t, HitRecord& rec) const override;
 
+    aabb bounding_box() const override {
+        return bbox;
+    }
+
 private:
     point3 center;
     float radius;
     shared_ptr<material> mat;
+    aabb bbox;
 };

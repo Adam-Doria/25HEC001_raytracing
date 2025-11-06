@@ -1,14 +1,15 @@
 #include "cube.hpp"
 
 #include "core/hitrecord.hpp"
-#include "core/ray.hpp"
-#include "maths/interval.hpp"
-#include "maths/vector3.hpp"
 #include "shape/triangle.hpp"
 
 cube::cube(const point3& center, float size, shared_ptr<material> material)
     : center(center), size(size), mat(material) {
     float half_size = size / 2.0f;
+
+    // Initialiser la bounding box
+    auto half_vector = vector3(half_size, half_size, half_size);
+    bbox = aabb(center - half_vector, center + half_vector);
 
     // Calcul des 8 sommets du cube
     point3 vertices[8];

@@ -47,7 +47,8 @@ public:
         return *this;
     }
     vector3& operator/=(const float t) {
-        return *this *= 1 / t;
+        float inv = 1.0f / t;
+        return *this *= inv;
     }
 
     float length() const {
@@ -56,6 +57,10 @@ public:
 
     float length_squared() const {
         return element[0] * element[0] + element[1] * element[1] + element[2] * element[2];
+    }
+
+    float inv_length() const {
+        return 1.0f / std::sqrt(length_squared());
     }
 
     static vector3 random() {
@@ -97,8 +102,9 @@ inline vector3 operator*(float t, const vector3& v) {
 inline vector3 operator*(const vector3& v, float t) {
     return t * v;
 }
-inline vector3 operator/(vector3 v, float t) {
-    return (1 / t) * v;
+inline vector3 operator/(const vector3& v, float t) {
+    float inv = 1.0f / t;
+    return inv * v;
 }
 inline float dot(const vector3& u, const vector3& v) {
     return u.element[0] * v.element[0] + u.element[1] * v.element[1] + u.element[2] * v.element[2];
@@ -108,8 +114,9 @@ inline vector3 cross(const vector3& u, const vector3& v) {
                    u.element[2] * v.element[0] - u.element[0] * v.element[2],
                    u.element[0] * v.element[1] - u.element[1] * v.element[0]);
 }
-inline vector3 unit_vector(vector3 v) {
-    return v / v.length();
+inline vector3 unit_vector(const vector3& v) {
+    float inv_len = v.inv_length();
+    return inv_len * v;
 }
 
 inline vector3 random_unit_vector() {

@@ -1,15 +1,12 @@
 #include "sphere.hpp"
 
-#include <algorithm>
-#include <cmath>
-
 #include "core/hitrecord.hpp"
-#include "core/ray.hpp"
-#include "maths/interval.hpp"
-#include "maths/vector3.hpp"
 
 sphere::sphere(const point3& center, float radius, shared_ptr<material> material)
-    : center(center), radius(std::max(1e-9f, radius)), mat(material) {}
+    : center(center), radius(std::max(1e-9f, radius)), mat(material) {
+    auto rvector = vector3(radius, radius, radius);
+    bbox = aabb(center - rvector, center + rvector);
+}
 
 bool sphere::hit(const ray& r, interval ray_t, HitRecord& rec) const {
     vector3 oc = r.origin() - center;

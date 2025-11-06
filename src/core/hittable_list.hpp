@@ -2,10 +2,10 @@
 
 #include <vector>
 
+#include "aabb.hpp"
 #include "hitrecord.hpp"
 #include "hittable.hpp"
 #include "lib/lib.hpp"
-#include "ray.hpp"
 
 class hittable_list : public Hittable {
 public:
@@ -20,6 +20,7 @@ public:
     }
     void add(shared_ptr<Hittable> object) {
         objects.push_back(object);
+        bbox = aabb(bbox, object->bounding_box());
     }
 
     bool hit(const ray& r, interval ray_t, HitRecord& rec) const override {
@@ -37,4 +38,11 @@ public:
 
         return hit_anything;
     }
+
+    aabb bounding_box() const override {
+        return bbox;
+    }
+
+private:
+    aabb bbox;
 };

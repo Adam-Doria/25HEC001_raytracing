@@ -1,5 +1,6 @@
 #include <vector>
 
+#include "core/bvh_node.hpp"
 #include "core/camera.hpp"
 #include "core/hitrecord.hpp"
 #include "core/hittable_list.hpp"
@@ -9,6 +10,7 @@
 #include "material/material.hpp"
 #include "shape/cube.hpp"
 #include "shape/plane.hpp"
+#include "shape/read_mesh.hpp"
 #include "shape/sphere.hpp"
 #include "shape/triangle.hpp"
 
@@ -20,6 +22,7 @@ int main() {
     cam.camera_origin = point3(0, 0, 0);
     cam.vfov = 45.0f;
     cam.focal_length = 1.0f;
+    cam.samples_per_pixel = 50;
     cam.max_depth = 5;
 
     // World
@@ -30,6 +33,8 @@ int main() {
     auto material_left = make_shared<metal>(color(0.8, 0.8, 0.8));
     auto material_right = make_shared<metal>(color(0.8, 0.6, 0.2));
     auto material_cube = make_shared<lambertian>(color(0.2, 0.8, 0.3));
+    auto material_dino = make_shared<metal>(color(0.4, 0.7, 0.3));
+    auto material_spaceship = make_shared<lambertian>(color(0.7, 0.7, 0.7));
 
     world.add(make_shared<sphere>(point3(0, 0, -5), 0.5, material_center));
     world.add(make_shared<sphere>(point3(-1.0, 0, -5.5), 0.5, material_left));
@@ -44,8 +49,13 @@ int main() {
 
     world.add(make_shared<cube>(point3(0, 1.2, -4), 0.8, material_cube));
 
+    read_mesh dino_loader("dino.obj", &world, material_dino, 0.1f, point3(-2, -0.5, -6));
+    dino_loader.add_mesh();
+
+    world = hittable_list(make_shared<bvh_node>(world));
+
     // Render
-    cam.render(world, "scene_with_material.png");
+    cam.render(world, "scene_with_mesh.png");
 
     return 0;
 }
