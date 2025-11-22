@@ -47,8 +47,12 @@ public:
         return *this;
     }
     vector3& operator/=(const float t) {
+#ifdef USE_MATH_OPTIMIZATIONS
         float inv = 1.0f / t;
         return *this *= inv;
+#else
+        return *this *= 1 / t;
+#endif
     }
 
     float length() const {
@@ -103,8 +107,12 @@ inline vector3 operator*(const vector3& v, float t) {
     return t * v;
 }
 inline vector3 operator/(const vector3& v, float t) {
+#ifdef USE_MATH_OPTIMIZATIONS
     float inv = 1.0f / t;
     return inv * v;
+#else
+    return (1 / t) * v;
+#endif
 }
 inline float dot(const vector3& u, const vector3& v) {
     return u.element[0] * v.element[0] + u.element[1] * v.element[1] + u.element[2] * v.element[2];
@@ -115,8 +123,12 @@ inline vector3 cross(const vector3& u, const vector3& v) {
                    u.element[0] * v.element[1] - u.element[1] * v.element[0]);
 }
 inline vector3 unit_vector(const vector3& v) {
+#ifdef USE_MATH_OPTIMIZATIONS
     float inv_len = v.inv_length();
     return inv_len * v;
+#else
+    return v / v.length();
+#endif
 }
 
 inline vector3 random_unit_vector() {

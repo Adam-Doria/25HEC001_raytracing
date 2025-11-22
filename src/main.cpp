@@ -14,7 +14,18 @@
 #include "shape/sphere.hpp"
 #include "shape/triangle.hpp"
 
-int main() {
+int main(int argc, char* argv[]) {
+    bool use_bvh = true;
+    bool use_multithreading = true;
+
+    for (int i = 1; i < argc; ++i) {
+        if (std::string(argv[i]) == "--no-bvh") {
+            use_bvh = false;
+        } else if (std::string(argv[i]) == "--no-mt") {
+            use_multithreading = false;
+        }
+    }
+
     // Camera setup
     camera cam;
     cam.aspect_ratio = 16.0f / 9.0f;
@@ -22,7 +33,7 @@ int main() {
     cam.camera_origin = point3(0, 0, 0);
     cam.vfov = 45.0f;
     cam.focal_length = 1.0f;
-    cam.samples_per_pixel = 50;
+    cam.samples_per_pixel = 500;
     cam.max_depth = 5;
 
     // World
@@ -49,13 +60,23 @@ int main() {
 
     world.add(make_shared<cube>(point3(0, 1.2, -4), 0.8, material_cube));
 
-    read_mesh dino_loader("dino.obj", &world, material_dino, 0.1f, point3(-2, -0.5, -6));
-    dino_loader.add_mesh();
+    // read_mesh dino_loader("dino.obj", &world, material_dino, 0.1f, point3(-2, -0.5, -6));
+    // dino_loader.add_mesh();
 
-    world = hittable_list(make_shared<bvh_node>(world));
+    if (use_bvh) {
+        world = hittable_list(make_shared<bvh_node>(world));
+    }
 
     // Render
-    cam.render(world, "scene_with_mesh.png");
+    std::string output_filename = "scene_with_mesh.png";
+    if (!use_bvh)
+        output_filename = "scene_no_bvh.png";
+    if (!use_multithreading)
+        output_filename = "scene_no_mt.png";
+    if (!use_bvh && !use_multithreading)
+        output_filename = "scene_baseline.png";
+
+    cam.render(world, output_filename, use_multithreading);
 
     return 0;
 }

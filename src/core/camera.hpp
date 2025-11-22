@@ -30,7 +30,8 @@ public:
      * @param world La liste des objets hittables dans la scène
      * @param output_filename Le nom du fichier de sortie
      */
-    void render(const hittable_list& world, const std::string& output_filename = "scene.png");
+    void render(const hittable_list& world, const std::string& output_filename = "scene.png",
+                bool use_multithreading = true);
 
 private:
     // Paramètres calculés

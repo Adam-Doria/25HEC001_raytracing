@@ -1,0 +1,5 @@
+Scenario,Run,Time
+Multithreading Only,1,217.584547
+Multithreading Only,2,217.305371
+Multithreading Only,3,215.768902
+BVH Only,1,732.583022

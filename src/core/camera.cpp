@@ -9,7 +9,8 @@
 #include "material/material.hpp"
 #include "maths/constants.hpp"
 
-void camera::render(const hittable_list& world, const std::string& output_filename) {
+void camera::render(const hittable_list& world, const std::string& output_filename,
+                    bool use_multithreading) {
     initialize_camera();
 
     Image canvas(image_width, image_height);
@@ -18,8 +19,8 @@ void camera::render(const hittable_list& world, const std::string& output_filena
     render_timer.start();
 
     unsigned int num_threads = std::thread::hardware_concurrency();
-    if (num_threads == 0)
-        num_threads = 4;
+    if (!use_multithreading || num_threads == 0)
+        num_threads = 1;
 
     std::cout << "Rendering with " << num_threads << " threads..." << std::endl;
 
@@ -82,8 +83,13 @@ void camera::initialize_camera() {
 
 color camera::background_color(const ray& r) const {
     // Précalcul des constantes (évite allocation à chaque appel)
+#ifdef USE_MATH_OPTIMIZATIONS
     static const color deep_space(0.2f, 0.2f, 0.5f);
     static const color space_blue(0.3f, 0.3f, 0.5f);
+#else
+    color deep_space(0.2f, 0.2f, 0.5f);
+    color space_blue(0.3f, 0.3f, 0.5f);
+#endif
 
     vector3 unit_direction = unit_vector(r.direction());
     auto t = 0.5f * (unit_direction.y() + 1.0f);
