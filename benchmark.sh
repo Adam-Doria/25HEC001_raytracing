@@ -24,8 +24,8 @@ run_scenario() {
     fi
     cmake --build build --config Release > /dev/null # Config is ignored by Makefiles but good for multi-config gens
 
-    # Run 3 times
-    for i in {1..3}; do
+    # Run 1 times
+    for i in {1..1}; do
         echo -n "  Run $i... "
         
         # Prepare command
@@ -76,22 +76,31 @@ run_scenario() {
 }
 
 # 1. Multithreading Only
-# run_scenario "Multithreading Only" "-DUSE_MATH_OPTIMIZATIONS=OFF" "--no-bvh" ""
+run_scenario "Multithreading Only" "-DUSE_MATH_OPTIMIZATIONS=OFF" "--no-bvh" "400"
 
 # 2. BVH Only
-run_scenario "BVH Only" "-DUSE_MATH_OPTIMIZATIONS=OFF" "--no-mt" ""
+run_scenario "BVH Only" "-DUSE_MATH_OPTIMIZATIONS=OFF" "--no-mt" "400"
 
 # 3. No Optimizations (Baseline)
-run_scenario "Baseline" "-DUSE_MATH_OPTIMIZATIONS=OFF" "--no-bvh --no-mt" ""
+run_scenario "Baseline" "-DUSE_MATH_OPTIMIZATIONS=OFF" "--no-bvh --no-mt" "400"
 
 # 4. Minor Optimizations
-run_scenario "Minor Optimizations" "-DUSE_MATH_OPTIMIZATIONS=ON" "--no-bvh --no-mt" ""
+run_scenario "Minor Optimizations" "-DUSE_MATH_OPTIMIZATIONS=ON" "--no-bvh --no-mt" "400"
 
 # 5. All Optimizations
-run_scenario "All Optimizations" "-DUSE_MATH_OPTIMIZATIONS=ON" "" ""
+run_scenario "All Optimizations" "-DUSE_MATH_OPTIMIZATIONS=ON" "" "400"
 
-# 6. Debug Mode (Timeout 300s = 5m)
+# 6. Debug Mode (Timeout 400s)
 # Note: Debug build might be very slow.
-run_scenario "Debug" "-DUSE_MATH_OPTIMIZATIONS=OFF" "--no-bvh --no-mt" "300"
+run_scenario "Debug" "-DUSE_MATH_OPTIMIZATIONS=OFF" "--no-bvh --no-mt" "400"
+
+# 7. BVH + Multithreading (no minor optimizations)
+run_scenario "BVH + MT" "-DUSE_MATH_OPTIMIZATIONS=OFF" "" "400"
+
+# 8. BVH + Minor Optimizations (no multithreading)
+run_scenario "BVH + Minor" "-DUSE_MATH_OPTIMIZATIONS=ON" "--no-mt" "400"
+
+# 9. Multithreading + Minor Optimizations (no BVH)
+run_scenario "MT + Minor" "-DUSE_MATH_OPTIMIZATIONS=ON" "--no-bvh" "400"
 
 echo "All benchmarks completed. Results saved to $CSV_FILE"
