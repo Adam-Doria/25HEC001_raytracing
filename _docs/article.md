@@ -150,6 +150,52 @@ bottlenecks (lack of multithreading, absence of spatial acceleration) have been 
 workflow: first implement a correct and maintainable baseline, then add architectural optimizations such as
 multithreading and BVH, and only finally optimize the hot inner loops where profiling shows clear bottlenecks.
 
+### 4.1. Linking performance back to the code
+
+The performance behavior observed in our experiments can be directly explained by the structure of the RayBorn code.
+
+For each pixel, the renderer loops over `samples_per_pixel` and calls a recursive `ray_color` function up to
+`max_depth` bounces. For Lambertian materials, each bounce generates one or more random directions (e.g. in a unit
+sphere or hemisphere) and performs several vector operations (normalization, dot products, component-wise products).
+In other words, the total cost is roughly proportional to:
+
+> #pixels × samples_per_pixel × expected_bounces ×  
+> (cost of rrandom numbers calls + cost of vec3 operations + cost of ray–scene intersection).
+
+In Scene A, the scene contains only a handful of primitives (plane, a few spheres, one cube). The cost of looping
+over all objects for each ray is therefore relatively small. What dominates is the per-ray work: random sampling,
+vector math, recursion and shading. Because we use 500 samples per pixel, the renderer generates billions of rays,
+and each ray triggers several calls to the random number generator and vector normalization routines. This explains
+why multithreading and micro-optimizations in `vec3` are very effective when combined, whereas BVH brings only
+a modest speedup: with so few objects, the overhead of BVH traversal is comparable to simply iterating over the list
+of primitives.
+
+In Scene B, the situation is completely different. The scene contains approximately 500 spheres on top of the base
+geometry, so each ray in the Baseline configuration must test intersections against hundreds of primitives. In this
+regime, the cost of the random sampling and vector math is still present, but it is dwarfed by the cost of repeatedly
+calling `hit()` on every object in the scene. Introducing a BVH replaces this O(N) loop over ~500 primitives by a
+hierarchical traversal where most subtrees are quickly rejected using cheap AABB tests, and only a small number of
+primitives are actually intersected. This reduces the number of ray–primitive intersection tests by roughly an order
+of magnitude, which matches the ~8× speedup observed in our measurements for BVH-only configurations.
+
+### 4.2. Role of multithreading and interaction with sampling
+
+Ray tracing is an embarrassingly parallel problem at the pixel level: each pixel can be rendered independently.
+In our implementation, multithreading simply distributes scanlines across the 16 hardware threads of the AMD Ryzen™ 7
+PRO 7730U used for the experiments. The higher the number of samples per pixel, the more compute work per pixel, and
+the better the CPU can be saturated by multiple threads.
+
+In Scene A, with 500 spp and relatively cheap ray–scene intersections, the workload is dominated by per-ray sampling
+and shading, which parallelize extremely well. This explains why the Multithreading Only and BVH + MT configurations
+achieve large speedups compared to the single-threaded baseline. In Scene B, multithreading still brings a substantial
+benefit, but the scaling is also influenced by memory hierarchy effects (a larger BVH, more cache misses) and by the
+cost of traversing a deeper acceleration structure.
+
+An important observation is that micro-optimizations in the math kernel (such as reducing the number of divisions in
+`unit_vector`) have almost no visible effect when used alone, but become meaningful once the main architectural
+bottlenecks (lack of BVH, lack of multithreading) have been addressed. At that point, the inner loops of the renderer
+are “hot” enough that saving a few cycles per operation translates into measurable gains at the frame level.
+
 ## 5. Conclusion and Future Work
 
 We presented RayBorn, a C++ ray tracer designed as a testbed to study the impact of several CPU optimization strategies
@@ -191,3 +237,237 @@ optimal optimization strategy strongly depends on workload: in simple scenes, mu
 optimizations dominate, whereas in complex scenes, spatial acceleration becomes the key factor, with up to 38× speedup
 over the baseline. We discuss these findings in the light of classical advice on premature optimization and outline
 directions for future work, including octrees, improved BRDF sampling, and GPU-based ray tracing.
+
+
+# Appendix – Detailed Numeric Results
+
+## A.1 Scene A – Per-scenario statistics (few objects, 500 spp)
+
+| Scenario | Mean time (s) | Std dev (s) | Runs | Speedup vs Baseline |
+|----------|----------------|-------------|------|----------------------|
+| Minor Optimizations | 378.346 | 0.969 | 10 | 0.99 |
+| Baseline | 376.199 | 1.670 | 10 | 1.00 |
+| BVH Only | 267.086 | 8.418 | 10 | 1.41 |
+| BVH + Minor | 262.413 | 11.920 | 10 | 1.43 |
+| Multithreading Only | 216.429 | 0.856 | 10 | 1.74 |
+| MT + Minor | 75.291 | 1.958 | 10 | 5.00 |
+| BVH + MT | 72.604 | 2.503 | 10 | 5.18 |
+| All Optimizations | 65.488 | 2.056 | 10 | 5.74 |
+
+## A.2 Scene B – Per-scenario statistics (500 spheres, 100 spp)
+
+| Scenario | Mean time (s) | Std dev (s) | Runs | Speedup vs Baseline |
+|----------|----------------|-------------|------|----------------------|
+| Baseline | 1060.434 | 13.263 | 10 | 1.00 |
+| Minor Optimizations | 1044.447 | 14.811 | 10 | 1.02 |
+| MT + Minor | 256.581 | 6.062 | 10 | 4.13 |
+| Multithreading Only | 230.182 | 5.051 | 10 | 4.61 |
+| BVH Only | 131.754 | 2.575 | 10 | 8.05 |
+| BVH + Minor | 131.589 | 1.100 | 10 | 8.06 |
+| BVH + MT | 30.857 | 0.467 | 10 | 34.37 |
+| All Optimizations | 27.926 | 0.332 | 10 | 37.97 |
+
+## A.3 Scene A – Per-run render times
+
+| Scenario | Run | Time (s) |
+|----------|-----|----------|
+| All Optimizations | 1 | 67.093 |
+| All Optimizations | 2 | 62.844 |
+| All Optimizations | 3 | 68.138 |
+| All Optimizations | 4 | 65.394 |
+| All Optimizations | 5 | 63.567 |
+| All Optimizations | 6 | 64.540 |
+| All Optimizations | 7 | 63.076 |
+| All Optimizations | 8 | 64.740 |
+| All Optimizations | 9 | 68.137 |
+| All Optimizations | 10 | 67.347 |
+| BVH + MT | 1 | 76.779 |
+| BVH + MT | 2 | 73.861 |
+| BVH + MT | 3 | 72.142 |
+| BVH + MT | 4 | 69.343 |
+| BVH + MT | 5 | 72.638 |
+| BVH + MT | 6 | 73.579 |
+| BVH + MT | 7 | 68.612 |
+| BVH + MT | 8 | 75.325 |
+| BVH + MT | 9 | 71.117 |
+| BVH + MT | 10 | 72.646 |
+| BVH + Minor | 1 | 252.234 |
+| BVH + Minor | 2 | 273.800 |
+| BVH + Minor | 3 | 268.346 |
+| BVH + Minor | 4 | 273.800 |
+| BVH + Minor | 5 | 247.724 |
+| BVH + Minor | 6 | 270.841 |
+| BVH + Minor | 7 | 273.800 |
+| BVH + Minor | 8 | 247.724 |
+| BVH + Minor | 9 | 247.724 |
+| BVH + Minor | 10 | 268.131 |
+| BVH Only | 1 | 270.887 |
+| BVH Only | 2 | 271.183 |
+| BVH Only | 3 | 251.426 |
+| BVH Only | 4 | 263.832 |
+| BVH Only | 5 | 254.071 |
+| BVH Only | 6 | 273.746 |
+| BVH Only | 7 | 272.475 |
+| BVH Only | 8 | 268.583 |
+| BVH Only | 9 | 267.299 |
+| BVH Only | 10 | 277.360 |
+| Baseline | 1 | 377.420 |
+| Baseline | 2 | 376.865 |
+| Baseline | 3 | 377.277 |
+| Baseline | 4 | 379.209 |
+| Baseline | 5 | 376.412 |
+| Baseline | 6 | 373.914 |
+| Baseline | 7 | 375.458 |
+| Baseline | 8 | 376.070 |
+| Baseline | 9 | 375.806 |
+| Baseline | 10 | 373.561 |
+| MT + Minor | 1 | 75.244 |
+| MT + Minor | 2 | 72.031 |
+| MT + Minor | 3 | 74.872 |
+| MT + Minor | 4 | 76.200 |
+| MT + Minor | 5 | 77.584 |
+| MT + Minor | 6 | 73.202 |
+| MT + Minor | 7 | 75.065 |
+| MT + Minor | 8 | 76.294 |
+| MT + Minor | 9 | 73.917 |
+| MT + Minor | 10 | 78.502 |
+| Minor Optimizations | 1 | 379.146 |
+| Minor Optimizations | 2 | 377.194 |
+| Minor Optimizations | 3 | 376.765 |
+| Minor Optimizations | 4 | 379.147 |
+| Minor Optimizations | 5 | 378.256 |
+| Minor Optimizations | 6 | 379.850 |
+| Minor Optimizations | 7 | 379.037 |
+| Minor Optimizations | 8 | 378.359 |
+| Minor Optimizations | 9 | 378.076 |
+| Minor Optimizations | 10 | 377.626 |
+| Multithreading Only | 1 | 216.592 |
+| Multithreading Only | 2 | 216.417 |
+| Multithreading Only | 3 | 217.556 |
+| Multithreading Only | 4 | 216.946 |
+| Multithreading Only | 5 | 217.735 |
+| Multithreading Only | 6 | 216.088 |
+| Multithreading Only | 7 | 215.146 |
+| Multithreading Only | 8 | 216.054 |
+| Multithreading Only | 9 | 215.242 |
+| Multithreading Only | 10 | 216.518 |
+
+## A.4 Scene B – Per-run render times
+
+| Scenario | Run | Time (s) |
+|----------|-----|----------|
+| All Optimizations | 1 | 28.309 |
+| All Optimizations | 2 | 27.751 |
+| All Optimizations | 3 | 27.792 |
+| All Optimizations | 4 | 28.182 |
+| All Optimizations | 5 | 28.400 |
+| All Optimizations | 6 | 27.544 |
+| All Optimizations | 7 | 27.626 |
+| All Optimizations | 8 | 27.544 |
+| All Optimizations | 9 | 27.843 |
+| All Optimizations | 10 | 28.271 |
+| BVH + MT | 1 | 30.748 |
+| BVH + MT | 2 | 29.968 |
+| BVH + MT | 3 | 31.247 |
+| BVH + MT | 4 | 31.337 |
+| BVH + MT | 5 | 31.337 |
+| BVH + MT | 6 | 30.422 |
+| BVH + MT | 7 | 31.310 |
+| BVH + MT | 8 | 30.473 |
+| BVH + MT | 9 | 30.932 |
+| BVH + MT | 10 | 30.794 |
+| BVH + Minor | 1 | 132.153 |
+| BVH + Minor | 2 | 132.689 |
+| BVH + Minor | 3 | 131.216 |
+| BVH + Minor | 4 | 130.767 |
+| BVH + Minor | 5 | 130.054 |
+| BVH + Minor | 6 | 132.689 |
+| BVH + Minor | 7 | 130.663 |
+| BVH + Minor | 8 | 130.283 |
+| BVH + Minor | 9 | 132.689 |
+| BVH + Minor | 10 | 132.689 |
+| BVH Only | 1 | 134.569 |
+| BVH Only | 2 | 129.890 |
+| BVH Only | 3 | 131.582 |
+| BVH Only | 4 | 128.604 |
+| BVH Only | 5 | 131.704 |
+| BVH Only | 6 | 129.215 |
+| BVH Only | 7 | 135.970 |
+| BVH Only | 8 | 134.568 |
+| BVH Only | 9 | 129.300 |
+| BVH Only | 10 | 132.141 |
+| Baseline | 1 | 1066.667 |
+| Baseline | 2 | 1052.369 |
+| Baseline | 3 | 1053.224 |
+| Baseline | 4 | 1047.446 |
+| Baseline | 5 | 1052.806 |
+| Baseline | 6 | 1078.373 |
+| Baseline | 7 | 1045.557 |
+| Baseline | 8 | 1082.724 |
+| Baseline | 9 | 1071.282 |
+| Baseline | 10 | 1053.892 |
+| MT + Minor | 1 | 249.863 |
+| MT + Minor | 2 | 261.831 |
+| MT + Minor | 3 | 259.572 |
+| MT + Minor | 4 | 262.436 |
+| MT + Minor | 5 | 248.854 |
+| MT + Minor | 6 | 261.034 |
+| MT + Minor | 7 | 254.046 |
+| MT + Minor | 8 | 259.094 |
+| MT + Minor | 9 | 246.985 |
+| MT + Minor | 10 | 262.098 |
+| Minor Optimizations | 1 | 1030.170 |
+| Minor Optimizations | 2 | 1030.170 |
+| Minor Optimizations | 3 | 1059.622 |
+| Minor Optimizations | 4 | 1030.170 |
+| Minor Optimizations | 5 | 1058.050 |
+| Minor Optimizations | 6 | 1066.729 |
+| Minor Optimizations | 7 | 1046.589 |
+| Minor Optimizations | 8 | 1057.438 |
+| Minor Optimizations | 9 | 1031.218 |
+| Minor Optimizations | 10 | 1034.310 |
+| Multithreading Only | 1 | 228.788 |
+| Multithreading Only | 2 | 223.953 |
+| Multithreading Only | 3 | 223.851 |
+| Multithreading Only | 4 | 236.114 |
+| Multithreading Only | 5 | 234.547 |
+| Multithreading Only | 6 | 226.397 |
+| Multithreading Only | 7 | 235.194 |
+| Multithreading Only | 8 | 225.804 |
+| Multithreading Only | 9 | 236.114 |
+| Multithreading Only | 10 | 231.057 |
+
+## A.5 Debug configuration – TIMEOUTs
+
+The `Debug` build never completed within the allowed time budget in either scene. All runs were recorded as `TIMEOUT`.
+
+### Scene A – Debug runs
+
+| Run | Status |
+|-----|--------|
+| 1 | TIMEOUT |
+| 2 | TIMEOUT |
+| 3 | TIMEOUT |
+| 4 | TIMEOUT |
+| 5 | TIMEOUT |
+| 6 | TIMEOUT |
+| 7 | TIMEOUT |
+| 8 | TIMEOUT |
+| 9 | TIMEOUT |
+| 10 | TIMEOUT |
+
+### Scene B – Debug runs
+
+| Run | Status |
+|-----|--------|
+| 1 | TIMEOUT |
+| 2 | TIMEOUT |
+| 3 | TIMEOUT |
+| 4 | TIMEOUT |
+| 5 | TIMEOUT |
+| 6 | TIMEOUT |
+| 7 | TIMEOUT |
+| 8 | TIMEOUT |
+| 9 | TIMEOUT |
+| 10 | TIMEOUT |
+
