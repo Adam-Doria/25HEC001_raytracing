@@ -82,12 +82,12 @@ void camera::initialize_camera() {
 
 color camera::background_color(const ray& r) const {
     // Précalcul des constantes (évite allocation à chaque appel)
-    static const color deep_space(0.2f, 0.2f, 0.5f);
-    static const color space_blue(0.3f, 0.3f, 0.5f);
+    static const color color_from(0.75f, 0.75f, 0.75f);
+    static const color color_to(0.9f, 0.8f, 0.7f);
 
     vector3 unit_direction = unit_vector(r.direction());
     auto t = 0.5f * (unit_direction.y() + 1.0f);
-    return (1.0f - t) * deep_space + t * space_blue;
+    return (1.0f - t) * color_from + t * color_to;
 }
 
 color camera::ray_color(const ray& r, int depth, const hittable_list& world) const {
